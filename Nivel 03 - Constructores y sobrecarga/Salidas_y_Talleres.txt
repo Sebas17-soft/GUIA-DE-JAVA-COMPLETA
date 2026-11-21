@@ -1,0 +1,96 @@
+================================================================================
+NIVEL 03: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 03 - Constructores y sobrecarga $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: BEBIDA ===
+Latte (grande) · $11000 · con leche
+Tinto (mediano) · $3500
+Latte + 2 extras: $14000
+Con cupón: $9900
+Rechazada: Nombre no puede estar vacío
+
+=== DEMOSTRACION SESION 04: RESERVA ===
+Familia Rojas · 6 pers. · 18:30
+En 15 min: Andrés · 2 pers. · 19:00
+No se pudo: Mesas de 1 a 8 personas
+
+=== DEMOSTRACION SESION 06: POSTRE ===
+Brownie $7000
+Cheesecake $9000 · sin azúcar
+
+=== DEMOSTRACION SESION 07: COMBO ===
+Combo: Cappuccino + Muffin · $14000 -> Total con 10% propina: $15400
+Combo: Americano + sin postre · $6000 -> Total: $6000
+Rechazado combo: La bebida no puede estar vacía
+
+=== DEMOSTRACION PREGUNTA 8 (S08): DOMICILIO CON SOBRECARGA ===
+Domicilio hacia: Carrera 15 # 80-20 · Costo: $6000
+Domicilio hacia: Calle 45 # 13-05 · Costo: $4000
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM (PREDECIR ANTES DE MIRAR LA TERMINAL)
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Qué imprime a.descripcion() y b.descripcion()?
+- Respuesta:
+  * a: `Latte (grande) · $11000 · con leche`
+  * b: `Tinto (mediano) · $3500`
+
+PREDICCIÓN 2:
+- Pregunta: ¿Cuál de las sobrecargas de precioCon se ejecuta con a.precioCon(2)?
+- Respuesta: Se ejecuta `precioCon(int extras)` porque el argumento literal 2 es de tipo `int`.
+  Resultado: 11000 + 2 * 1500 = $14,000.
+
+PREDICCIÓN 3:
+- Pregunta: ¿Qué pasa al ejecutar new Bebida(" ", 3000)?
+- Respuesta: En Java 25 el prólogo del constructor corto evalúa `nombre.isBlank()` y lanza
+  inmediatamente `IllegalArgumentException("Nombre no puede estar vacío")`. El objeto nunca
+  llega a instanciarse.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (CLASE POSTRE)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[this (x2), Brownie, boolean, int, true, etiqueta, super, Postre, void, false, new]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ Postre           │ Nombre del constructor completo (mismo nombre de la clase). │
+│ 2       │ this             │ Desambigua el atributo de instancia del parámetro nombre.   │
+│ 3       │ this             │ Llama al constructor completo delegando valores.            │
+│ 4       │ false            │ Valor por defecto para sinAzucar en el constructor corto.   │
+│ 5       │ boolean          │ Tipo de parámetro de la sobrecarga de etiqueta(detallada).  │
+│ 6       │ etiqueta         │ Reutiliza la versión base sin parámetros del método.        │
+│ 7       │ new              │ Operador para instanciar el postre en Main.                 │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué el espacio 1 no lleva tipo de retorno? ¿Qué pasaría si escribes void ahí?
+   Respuesta: Los constructores en Java no llevan tipo de retorno. Si se colocara `void`, Java lo
+   trataría erróneamente como un método ordinario y la clase se quedaría sin constructor explícito.
+
+2. Pregunta: Si en el espacio 4 pones true, ¿qué imprime la primera línea?
+   Respuesta: Imprimiría `Brownie $7000 · sin azúcar`, asumiendo falsamente que todos los brownies
+   son sin azúcar por defecto.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (CLASE COMBO)
+--------------------------------------------------------------------------------
+Requisitos implementados en Combo.java:
+1. Atributos final: `String bebida`, `String postre`, `int precio`.
+2. Constructor completo: `Combo(bebida, postre, precio)` valida `precio > 0`.
+3. Constructor corto: `Combo(bebida, precio)` con prólogo en Java 25 que rechaza `bebida.isBlank()`
+   y delega con `this(bebida, "sin postre", precio)`.
+4. Sobrecargas de `precioFinal()` y `precioFinal(int propinaPct)`.
+================================================================================

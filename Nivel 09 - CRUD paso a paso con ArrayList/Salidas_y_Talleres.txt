@@ -1,0 +1,84 @@
+================================================================================
+NIVEL 09: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 09 - CRUD paso a paso con ArrayList $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: CRUD DE INVENTARIO ===
+Listado inicial:
+  #1 Café en grano Huila (kg): 25
+  #2 Leche entera (L): 40
+  #3 Vasos 12oz: 200
+Actualizar vasos a 180: true
+Buscando insumo 2: #2 Leche entera (L): 40
+Buscando insumo 99: No encontrado
+Borrar insumo 1: true
+¿Existe 'Leche entera (L)'? true
+¿Existe 'Azúcar'? false
+Listado tras borrado:
+  #2 Leche entera (L): 40
+  #3 Vasos 12oz: 180
+
+=== DEMOSTRACION SESION 06: LISTA DE ESPERA ===
+En espera: 3
+Sigue: Rojas (4)
+[Gómez (5), Pérez (3)]
+¿Pérez? true
+
+=== DEMOSTRACION SESION 07: AGENDA DE RESERVAS ===
+Reservas registradas:
+  Reserva #1 · Familia Martínez (4 pers.) a las 18:30
+  Reserva #2 · Carlos Duque (2 pers.) a las 19:00
+  Reserva #3 · Empresa ACME (8 pers.) a las 18:30
+Reservas de las 18:30:
+  Reserva #1 · Familia Martínez (4 pers.) a las 18:30
+  Reserva #3 · Empresa ACME (8 pers.) a las 18:30
+Tras cambiar hora de Carlos Duque: Reserva #2 · Carlos Duque (2 pers.) a las 20:00
+Tras cancelar reserva 1, total activas: 2
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Qué devuelve inv.buscar(99) si no existe?
+- Respuesta: Devuelve `Optional.empty()`.
+
+PREDICCIÓN 2:
+- Pregunta: Si dos insumos tienen la misma cantidad, ¿cuál borra removeIf?
+- Respuesta: Borra todos los que cumplan la condición del predicado booleano. Por eso
+  se filtra estrictamente por `id`, que es único.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (LISTA DE ESPERA)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[remove, push, getFirst, getLast, length, set, put, add, ArrayList, contains, size, removeIf]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ ArrayList        │ Clase concreta que implementa List para la lista de espera. │
+│ 2       │ add              │ Operación C (Create) para añadir a la familia Rojas.        │
+│ 3       │ size             │ Operación R (Read) para consultar la cantidad en espera.    │
+│ 4       │ getFirst         │ Consulta el primer comensal en turno en Java 25.            │
+│ 5       │ set              │ Operación U (Update) para actualizar la posición 1.         │
+│ 6       │ removeIf         │ Operación D (Delete) con predicado lambda.                  │
+│ 7       │ contains         │ Verifica la presencia del elemento en la lista.             │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué el espacio 6 usa una lambda en vez de una posición fija?
+   Respuesta: Porque las posiciones en un ArrayList se desplazan cuando se borran o insertan
+   elementos anteriores; una lambda basada en el contenido elimina al elemento correcto sin importar su índice.
+
+2. Pregunta: Si en el espacio 4 usas getLast, ¿qué línea cambia?
+   Respuesta: Imprimiría `Sigue: Pérez (3)` en lugar de `Sigue: Rojas (4)`, atendiendo al último en llegar en vez de al primero.
+================================================================================

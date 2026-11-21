@@ -1,0 +1,198 @@
+================================================================================
+NIVEL 04: HERENCIA Y COMPOSICIÓN · FAMILIAS DEL MENÚ
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Qué comparten los productos del menú y cómo se arma un pedido?
+- Contexto de Café Sintaxis:
+  El menú ha crecido: ahora hay bebidas, postres, productos de temporada y combos.
+  Copiar `nombre` y `precio` en cada clase es insostenible y propenso a errores. Además,
+  un pedido se compone de varias líneas con cantidades. Valeria necesita estructurar
+  la cafetería modelando familias de productos y pedidos agregados sin duplicar código.
+- Objetivos de aprendizaje:
+  1. Comprender la herencia con `extends` y la reutilización con `super(...)`.
+  2. Sobrescribir métodos con `@Override` y reutilizar el comportamiento base con `super.metodo()`.
+  3. Comprender el polimorfismo dinámico: variables del tipo padre (`Producto`) que ejecutan
+     el método de la subclase concreta en tiempo de ejecución.
+  4. Aplicar la prueba conceptual «es un» (herencia) frente a «tiene un» (composición).
+  5. Seguir el principio de diseño de Bloch y Gamma: "Favorece la composición sobre la herencia".
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS (JAVA SE 25)
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- SUBCLASE Y SUPERCLASE (JLS Java SE 25, §8.1.4):
+  «Una clase puede extender otra clase... Se dice que la clase derivada es una subclase
+  directa de la clase dada (su superclase directa).»
+  Java maneja estrictamente HERENCIA SIMPLE para clases: una clase solo puede tener
+  un padre directo (`extends`), aunque puede implementar múltiples interfaces.
+
+- SOBRESCRITURA DE MÉTODOS (JLS Java SE 25, §8.4.8.1):
+  «Un método de instancia `m1` declarado o heredado por una clase `C` sobrescribe
+  desde `C` otro método `m2` declarado en la superclase si tienen la misma firma.»
+  La anotación `@Override` le indica al compilador que valide que efectivamente se está
+  sobrescribiendo un método existente del padre.
+
+- COMPOSICIÓN («Tiene un»):
+  Mecanismo de diseño donde una clase compleja contiene referencias a objetos de otras
+  clases para delegar responsabilidades, en lugar de heredar su estado.
+
+Analogía con la cafetería:
+- Herencia: Un Latte «ES UN» Producto (comparte nombre y precio, pero añade mililitros).
+- Composición: Un Pedido «TIENE UN» grupo de Líneas de Pedido; una Línea «TIENE UN» Producto.
+  Un pedido no es un producto; se compone de productos.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: POLIMORFISMO Y LA PRUEBA «ES UN / TIENE UN»
+--------------------------------------------------------------------------------
+Polimorfismo Dinámico (Dynamic Method Dispatch):
+Cuando almacenamos objetos `Bebida` y `Postre` en una colección `List<Producto>`,
+al llamar a `p.descripcion()` en un bucle, la máquina virtual no ejecuta ciegamente
+la versión genérica de `Producto`, sino que consulta el tipo real del objeto en el montículo
+y despacha la versión sobrescrita correspondiente (`Bebida` imprime los ml; `Postre` imprime si es vegano).
+
+Regla de Decisión Arquitectónica:
+¿Cuándo usar herencia?
+Úsala únicamente cuando exista una verdadera relación de sustitución de Liskov: todo lo que
+aplica al padre aplica de manera natural y sin excepciones a la hija.
+¿Cuándo usar composición?
+Úsala cuando un objeto coordina, agrupa o utiliza a otros. Un `Pedido` nunca debe heredar
+de `Producto` ni de `ArrayList`; un pedido *tiene* una lista de líneas.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Estructura de Bebida y Postre:
+- En sus constructores, la primera instrucción es `super(nombre, precio);`.
+  El compilador garantiza que el estado del padre quede completamente inicializado
+  antes de que la subclase asigne sus campos específicos (`ml` o `vegano`).
+- `@Override public String descripcion()` invoca `super.descripcion()` para reutilizar
+  el formato base "Nombre $Precio" y concatena la información propia.
+
+Estructura de Pedido y LineaPedido:
+- `LineaPedido` combina un `Producto` con una `cantidad` y calcula `subtotal()`.
+- `Pedido` es dueño de `List<LineaPedido>`. No expone la lista directamente; ofrece
+  `agregar(Producto, int)` y calcula el `total()` sumando los subtotales delegados.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: EL ERROR CLÁSICO DE HEREDAR DE ESTRUCTURAS
+--------------------------------------------------------------------------------
+- Joshua Bloch (Effective Java, Item 18):
+  Heredar de clases de utilidad como `ArrayList` o `Vector` expone métodos internos
+  (como `clear()`, `remove()`, `sort()`) que pueden romper los invariantes del negocio.
+  La composición crea una barrera protectora donde el pedido solo expone operaciones
+  válidas para la cafetería.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué palabra declara que una clase hereda de otra?
+  a) implements
+  b) extends
+  c) super
+  d) new
+RESPUESTA CORRECTA: b) extends
+JUSTIFICACIÓN:
+`extends` es la palabra reservada en Java para establecer la relación de herencia entre clases.
+`implements` se usa para interfaces, `super` para referirse al padre, y `new` para instanciar.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"En Java una clase puede tener dos superclases directas."
+  [V]  [F]
+RESPUESTA CORRECTA: FALSO (F)
+JUSTIFICACIÓN:
+Java prohíbe la herencia múltiple de clases para evitar el problema del diamante y ambigüedades
+en el estado. Una clase solo puede extender una única superclase directa.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada pieza con su función:
+  - super(…)            ---> Llama al constructor del padre
+  - @Override           ---> Confirma la sobrescritura
+  - super.descripcion() ---> Reusa el método del padre
+  - List<LineaPedido>   ---> Composición
+JUSTIFICACIÓN:
+`super(...)` inicializa la superclase; `@Override` es una verificación de compilación;
+`super.descripcion()` invoca la lógica previa del padre; y almacenar una colección de líneas
+es un patrón de composición («tiene muchos»).
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena lo que ocurre con `new Bebida("Latte", 9500, 350)`:
+  [1] Java elige el constructor de Bebida
+  [2] super(…) ejecuta el constructor de Producto
+  [3] Se asignan nombre y precio
+  [4] Se asigna ml
+  [5] La variable recibe el objeto
+JUSTIFICACIÓN:
+Primero se despacha el constructor de la subclase; este inmediatamente transfiere el control
+a `super(...)`; se inicializa el estado del padre; luego se asigna el estado propio de la hija;
+y finalmente se devuelve la referencia construida.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+Al recorrer List<Producto>, el latte imprime «… · 350 ml». ¿Por qué?
+  a) La lista lo convierte en Bebida
+  b) Cada objeto usa su propia versión sobrescrita
+  c) Producto copia el método de Bebida
+  d) Es un error de Java
+RESPUESTA CORRECTA: b) Cada objeto usa su propia versión sobrescrita
+JUSTIFICACIÓN:
+Es el principio de polimorfismo dinámico: en tiempo de ejecución, la llamada a un método
+de instancia se vincula con la implementación de la clase concreta del objeto en memoria.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica con la prueba «es un / tiene un» por qué Pedido no debe heredar de LineaPedido.
+RESPUESTA Y JUSTIFICACIÓN:
+Al aplicar la prueba lingüística y conceptual:
+¿Un Pedido ES UNA Línea de pedido? Falso. Una línea es un ítem individual con una cantidad.
+¿Un Pedido TIENE Líneas de pedido? Verdadero. El pedido es un contenedor global de la mesa.
+Si heredara, un Pedido solo podría tener un único producto y cantidad, destruyendo la lógica comercial.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Bloch y Gamma recomiendan preferir composición. Da un caso de la cafetería en que la herencia sí es la mejor opción y justifícalo.
+RESPUESTA Y JUSTIFICACIÓN:
+La relación entre `Producto` y `Bebida` (o `Postre`):
+Una `Bebida` ES incuestionablemente un `Producto`: se exhibe en el menú, tiene nombre, tiene precio,
+paga impuestos y se vende. Heredar de `Producto` permite tratar a todas las bebidas y postres
+uniformemente en el catálogo, en la carta y en la facturación mediante polimorfismo puro.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe class Te extends Bebida con el atributo origen y su descripcion() sobrescrita.
+RESPUESTA Y CÓDIGO:
+```java
+public class Te extends Bebida {
+    private final String origen;
+
+    public Te(String nombre, int precio, int ml, String origen) {
+        super(nombre, precio, ml);
+        this.origen = origen;
+    }
+
+    @Override
+    public String descripcion() {
+        return super.descripcion() + " · origen: " + origen;
+    }
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 04 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en herencia, super(), polimorfismo, @Override y composición.
+- Mapa conceptual:
+  Herencia vs Composición
+    ├── Herencia («es un»): Producto ──► Bebida, Postre, Temporada
+    │     ├── super(...) para inicializar padre
+    │     └── @Override para especializar comportamiento
+    └── Composición («tiene un»): Pedido ──* LineaPedido ──1 Producto
+          ├── Mayor flexibilidad
+          └── Protección de invariantes internos
+- Insignia obtenida: «Diseñador/a de familias».
+- Explicación en 60 segundos:
+  "La herencia permite compartir estructura y polimorfismo cuando hay una relación 'es un'
+  auténtica (como Bebida es Producto). La composición permite construir sistemas flexibles
+  donde los objetos colaboran conteniéndose mutuamente ('tiene un', como Pedido contiene Líneas),
+  evitando acoplamientos rígidos y protegiendo el negocio."
+================================================================================

@@ -1,0 +1,185 @@
+================================================================================
+NIVEL 10: RECORDS: DATOS INMUTABLES · RECIBOS QUE NO SE ALTERAN
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo hago recibos, comandas y comprobantes que no se alteren jamás?
+- Contexto de Café Sintaxis:
+  Un recibo impreso o una factura emitida jamás debe modificarse. En clases ordinarias,
+  cualquier descuido con un setter o un campo mutable permitía alterar los precios o
+  las cantidades de una transacción ya cerrada. Además, escribir clases de datos exigía
+  decenas de líneas repetitivas de getters, `equals()`, `hashCode()` y `toString()`.
+  Valeria necesita records: portadores de datos inmutables transparentes y concisos
+  garantizados por el compilador de Java.
+- Objetivos de aprendizaje:
+  1. Comprender la semántica de `record` según la JLS (§8.10) como clase portadora de datos inmutable.
+  2. Conocer los métodos generados automáticamente: componentes, constructor canónico, `equals`, `hashCode`, `toString`.
+  3. Implementar constructores compactos para validación sin duplicar asignaciones.
+  4. Dominar la coincidencia de patrones (pattern matching) para desarmar records con `instanceof` y `switch`.
+  5. Combinar `sealed interface` con `record` para modelar tipos de datos algebraicos sellados.
+  6. Aplicar copias defensivas inmutables para componentes de tipo colección (`List.copyOf`).
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS (JAVA SE 25)
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- RECORD (JLS Java SE 25, §8.10):
+  «Una clase record es una clase que está implícitamente final y declara una lista de componentes
+  de record. A partir de estos componentes, el compilador genera automáticamente:
+  - Campos privados y final para cada componente.
+  - Métodos accesores públicos con el MISMO NOMBRE del componente (ej. `producto()`, NO `getProducto()`).
+  - Un constructor canónico que asigna todos los componentes.
+  - Implementaciones coherentes de `equals(Object)`, `hashCode()` y `toString()`.»
+
+- CONSTRUCTOR COMPACTO (Compact Constructor):
+  Sintaxis especial que omite la lista de parámetros y las asignaciones finales:
+  ```java
+  public LineaRecibo {
+      if (cantidad < 1) throw new IllegalArgumentException("Mínimo 1");
+  }
+  ```
+  Permite validar y normalizar datos antes de que el compilador asigne automáticamente
+  los componentes a los campos finales.
+
+- DESESTRUCTURACIÓN Y PATRONES DE RECORD (JEP 440):
+  Permite desarmar los datos de un record directamente en un `if` o `switch`:
+  `if (obj instanceof LineaRecibo(var p, var precio, var c)) { ... }`.
+
+Analogía con la cafetería:
+Una tirilla fiscal o factura de compra emitida por la impresora: una vez que la tinta
+seca sobre el papel, es un documento inmutable e inalterable. No tiene setters; es un registro
+fiel y transparente de lo que ocurrió.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: TABLA COMPARATIVA CLASE VS RECORD
+--------------------------------------------------------------------------------
+Diferencias arquitectónicas:
+
+┌────────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ Característica             │ Clase Ordinaria            │ Record                     │
+├────────────────────────────┼────────────────────────────┼────────────────────────────┤
+│ Mutabilidad                │ Mutable por defecto        │ Rigurosamente INMUTABLE    │
+│ Herencia con extends       │ SÍ                         │ NO (hereda de java.lang.   │
+│                            │                            │     Record; es final)      │
+│ Nombre de los accesores    │ getNombre() / setNombre()  │ nombre() (sin get)         │
+│ equals / hashCode          │ Por identidad de memoria   │ Por valor de componentes   │
+│ toString()                 │ NombreClase@hexHash        │ Nombre[campo1=val, ...]    │
+│ Líneas de código típicas   │ 50 - 80 líneas boilerplate │ 1 - 3 líneas concisas      │
+└────────────────────────────┴────────────────────────────┴────────────────────────────┘
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Recibo.java y Copia Defensiva:
+- Un record con un componente `List<T>` podría verse comprometido si la lista original
+  externa muta. Por eso, en el constructor compacto de `Recibo` se realiza:
+  `lineas = List.copyOf(lineas);`, blindando la inmutabilidad de toda la estructura.
+
+Jerarquía Sellada (Sealed Data):
+```java
+public sealed interface Pago permits Efectivo, Tarjeta, Billetera { }
+```
+Permite crear un switch exhaustivo donde cada rama inspecciona un record concreto
+y desestructura sus componentes (ej. `case Efectivo(int r)`).
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: RECORDS EN ARQUITECTURA MODERNA (DTOs)
+--------------------------------------------------------------------------------
+- Los records son la estructura predilecta en Java para DTOs (Data Transfer Objects),
+  respuestas de APIs REST JSON, eventos de Kafka y proyecciones de bases de datos,
+  garantizando que la información viaje limpia y sin riesgo de mutación imprevista.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Cómo se llama el acceso al componente precio de un record?
+  a) getPrecio()
+  b) precio()
+  c) .precio
+  d) setPrecio()
+RESPUESTA CORRECTA: b) precio()
+JUSTIFICACIÓN:
+Por especificación oficial de la JLS, los accesores automáticos de un record coinciden
+exactamente con el nombre del componente, sin el prefijo JavaBean `get`.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Dos records con los mismos valores en sus componentes son iguales según equals."
+  [V]  [F]
+RESPUESTA CORRECTA: VERDADERO (V)
+JUSTIFICACIÓN:
+El compilador genera un `equals()` basado en igualdad por valor de estado (componente a componente),
+a diferencia de las clases normales que por defecto comparan referencias de memoria.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada pieza con su función:
+  - Encabezado           ---> Declara los componentes
+  - Constructor compacto ---> Valida antes de asignar
+  - List.copyOf          ---> Protege la lista interna
+  - Patrón de record     ---> Extrae los componentes
+JUSTIFICACIÓN:
+El encabezado define la firma; el compacto valida sin repetir asignaciones; `List.copyOf`
+crea inmutabilidad profunda; y el patrón desestructura datos.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena lo que ocurre en `new LineaRecibo("Latte", 9500, 2)`:
+  [1] Java elige el constructor canónico
+  [2] Corre el cuerpo del compacto
+  [3] Se valida la cantidad
+  [4] Se asignan los tres campos
+  [5] La variable recibe el record
+JUSTIFICACIÓN:
+La creación invoca el constructor canónico, el cual ejecuta las validaciones del bloque
+compacto y finalmente asigna los campos finales de forma automática.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+Dentro del record, cantidad = cantidad * 2; no compila. ¿Por qué?
+  a) Falta this
+  b) Los campos de un record son final
+  c) cantidad es String
+  d) Falta return
+RESPUESTA CORRECTA: b) Los campos de un record son final
+JUSTIFICACIÓN:
+Los componentes de un record son inmutables (`final`). No es posible reasignar su valor
+una vez inicializados.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué Recibo copia la lista en su constructor compacto y qué podría pasar si no lo hiciera.
+RESPUESTA Y JUSTIFICACIÓN:
+Si `Recibo` no hiciera `lineas = List.copyOf(lineas);`, conservaría una referencia directa
+a la lista mutable externa pasada como argumento. Quien tenga esa referencia original
+podría llamar a `lista.clear()` o `lista.add(...)` minutos después, alterando el contenido
+y el total del recibo a espaldas del objeto, destruyendo la garantía de inmutabilidad.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Julián quiere convertir Insumo del nivel 9 en record. ¿Es buena idea? Justifica.
+RESPUESTA Y JUSTIFICACIÓN:
+NO es una buena idea para el caso de uso del nivel 9. Un `Insumo` de inventario en una barra
+es una entidad mutable por naturaleza: su stock cambia constantemente a lo largo del turno
+con cada café vendido (`setCantidad`). Modelarlo como record obligaría a destruir y recrear
+un objeto nuevo en cada venta, complicando el mantenimiento en listas y perdiendo identidad.
+Los records son para datos inmutables (recibos, pagos, ítems de catálogo); las entidades mutables
+deben ser clases ordinarias bien encapsuladas.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe record Propina(String barista, int valor) que rechace valores negativos.
+RESPUESTA Y CÓDIGO:
+```java
+public record Propina(String barista, int valor) {
+    public Propina {
+        if (valor < 0) {
+            throw new IllegalArgumentException("Propina no puede ser negativa: " + valor);
+        }
+    }
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 10 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en records, constructor compacto, inmutabilidad, patrones y sealed.
+- Insignia obtenida: «Notario/a de datos».
+================================================================================

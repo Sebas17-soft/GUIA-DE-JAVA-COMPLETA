@@ -1,0 +1,163 @@
+================================================================================
+NIVEL 01: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 01 - Clases, métodos y atributos $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: PRODUCTO ===
+Latte · $9500 · stock 3
+¿Hay brownie? false
+Cobrar: $19000
+Latte · $9500 · stock 1
+No alcanza: hay 1
+
+=== DEMOSTRACION SESION 04: CLIENTE ===
+Sofia: 53 puntos
+¿Cafe gratis? true
+Tras canjear cafe: Sofia: 3 puntos
+
+=== DEMOSTRACION SESION 06: MESA ===
+Mesa 4 ocupada por 3
+Mesa 4 libre
+
+=== DEMOSTRACION SESION 07: BARISTA ===
+Martin prepara un Latte
+Martin prepara un Latte
+Martin prepara un Latte
+Martin (mañana): 3 bebidas
+¿Martin merece pausa? false
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana prepara un Espresso
+Ana (tarde): 21 bebidas
+¿Ana merece pausa? true
+
+=== DEMOSTRACION PREGUNTA 8 (S08): DOMICILIO ===
+Domicilio a Cra 7 # 45-10 · Estado: pendiente
+Domicilio a Cra 7 # 45-10 · Estado: en camino
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM (PREDECIR ANTES DE MIRAR LA TERMINAL)
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: Tapa la terminal. ¿Qué imprime brownie.hayStock() si nunca le asignaste stock? ¿Por qué?
+- Respuesta predicha y verificada: Imprime `false`.
+- Justificación: En Java, las variables miembro numéricas de una clase que no se inicializan
+  explícitamente toman el valor por defecto 0. Al evaluar `stock > 0`, la expresión `0 > 0` resulta en `false`.
+
+PREDICCIÓN 2:
+- Pregunta: ¿Cuánto vale cobro en la línea 11? Haz la cuenta antes de ejecutar.
+- Respuesta predicha y verificada: Vale `19000`.
+- Justificación: Se piden 2 unidades y el precio unitario del Latte es 9500. `2 * 9500 = 19000`.
+
+PREDICCIÓN 3:
+- Pregunta: Después de latte.vender(2), ¿cuántos lattes quedan? ¿Y después de pedir 5?
+- Respuesta predicha y verificada:
+  * Después de vender 2: queda `1` unidad (`3 - 2 = 1`).
+  * Después de pedir 5: sigue quedando `1` unidad.
+- Justificación: La condición `if (cantidad > stock)` detecta que `5 > 1`, imprime
+  "No alcanza: hay 1" y retorna 0 sin modificar el stock existente.
+
+PREDICCIÓN 4:
+- Pregunta: Si creas un tercer objeto Producto sin asignar nada, ¿qué mostrará stock?
+- Respuesta predicha y verificada: Mostrará `0`.
+- Justificación: Por especificación de la JVM, todo campo de tipo `int` no inicializado
+  en una nueva instancia adquiere el valor por defecto 0.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 04 · PRÁCTICA GUIADA (CLIENTE Y PUNTOS)
+--------------------------------------------------------------------------------
+Reto guiado 1:
+- Método añadido: `void canjear()` en Cliente.java.
+- Implementación:
+  ```java
+  void canjear() {
+      if (puedeCanjear()) {
+          puntos -= 50;
+      }
+  }
+  ```
+- Salida verificada: Sofía tenía 53 puntos, canjea 50 puntos y queda con 3 puntos.
+
+Reto guiado 2:
+- Creación de segundo cliente con 0 puntos que compra $9999.
+- Cálculo de puntos: `0 + 9999 / 1000 = 9` puntos.
+- Evaluación de `puedeCanjear()`: `9 >= 50` da `false`.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (CLASE MESA)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[int, Mesa(), return, liberar, String, new, static, boolean, class, estado, void, ocupar]
+(7 van en los espacios, 5 sobran)
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ class            │ Declara el molde y estructura de la clase llamada Mesa.     │
+│ 2       │ boolean          │ Tipo de dato para el atributo que registra si está ocupada. │
+│ 3       │ void             │ Tipo de retorno del método liberar, que no devuelve valor.  │
+│ 4       │ return           │ Devuelve la cadena con el número de mesa y personas.        │
+│ 5       │ new              │ Operador para instanciar en memoria el objeto Mesa.         │
+│ 6       │ ocupar           │ Método invocado para asignar comensales y ocupar la mesa.   │
+│ 7       │ estado           │ Método invocado para consultar y mostrar la situación.      │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+Palabras sobrantes: int, Mesa(), String, static, liberar.
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué el espacio 3 no puede ser boolean? ¿Qué tendría que pasar dentro del método para que sí lo fuera?
+   Respuesta: No puede ser boolean porque el cuerpo del método solo asigna variables (`personas = 0; ocupada = false;`)
+   y no tiene ninguna instrucción `return`. Para que fuera boolean, tendría que devolver un valor de verdad (por ejemplo,
+   `return true;` indicando que la liberación fue exitosa).
+
+2. Pregunta: Si en el espacio 5 olvidas new, ¿qué error esperas?
+   Respuesta: El compilador emite un error de tipo:
+   `error: cannot find symbol ... method Mesa()`.
+   Java interpreta `Mesa()` como una llamada a un método ordinario que no existe, en vez de la instanciación de un objeto.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 07 · RETO 2: HAZLO TÚ (CLASE BARISTA)
+--------------------------------------------------------------------------------
+Requisitos implementados en Barista.java:
+1. Atributos: `String nombre`, `String turno`, `int bebidas`, `int propinas`.
+2. Método `void preparar(String bebida)`: Imprime nombre preparando la bebida y suma 1 al contador.
+3. Método `String resumen()`: Retorna `nombre + " (" + turno + "): " + bebidas + " bebidas"`.
+4. Método `boolean merecePausa()`: Retorna `bebidas >= 20`.
+5. Método extra `void recibirPropina(int valor)`: Acumula propina ignorando valores `<= 0`.
+
+Pruebas ejecutadas en Main.java:
+- Barista 1 (Martín, mañana): Prepara 3 bebidas.
+  Resumen: `Martín (mañana): 3 bebidas`
+  ¿Merece pausa?: `false` (3 < 20).
+- Barista 2 (Ana, tarde): Prepara 21 bebidas.
+  Resumen: `Ana (tarde): 21 bebidas`
+  ¿Merece pausa?: `true` (21 >= 20).
+- Caso límite probado: Con exactamente 20 bebidas preparadas, `merecePausa()` retorna `true`.
+================================================================================

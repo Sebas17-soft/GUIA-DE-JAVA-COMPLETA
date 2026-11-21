@@ -1,0 +1,184 @@
+================================================================================
+NIVEL 05: CLASES ABSTRACTAS E INTERFACES · CONTRATOS DE LA BARRA
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo trato igual a medios de pago y formas de entrega distintos?
+- Contexto de Café Sintaxis:
+  La cafetería no solo vende en la barra: entrega en mesas, despacha para llevar y envía domicilios.
+  Además, los clientes pagan con efectivo, tarjetas y billeteras digitales. Modificar la caja cada vez
+  que surge un nuevo medio de pago o forma de entrega rompería el sistema. Valeria necesita
+  establecer contratos formales para que el sistema funcione con cualquier medio sin modificar
+  la lógica central de cobro y despacho.
+- Objetivos de aprendizaje:
+  1. Comprender el propósito de una clase abstracta: molde incompleto que no puede instanciarse (`new`).
+  2. Declarar métodos abstractos que obligan a las subclases a proporcionar una implementación concreta.
+  3. Declarar e implementar interfaces como contratos puros de comportamiento (`implements`).
+  4. Utilizar métodos `default` en interfaces para proveer lógica común reutilizable.
+  5. Programar contra abstracciones e interfaces (Inversión de dependencias / Polimorfismo por contrato).
+  6. Utilizar coincidencia de patrones con `instanceof` (pattern matching).
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS (JAVA SE 25)
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- CLASE ABSTRACTA (JLS Java SE 25, §8.1.1.1):
+  «Una clase abstracta es una clase que está incompleta o que se pretende que esté incompleta y no puede instanciarse.»
+  Sirve como base conceptual compartida: puede contener constructores, atributos de estado
+  (privados o protegidos) y métodos concretos, junto con métodos abstractos.
+
+- MÉTODO ABSTRACTO (JLS Java SE 25, §8.4.3.1):
+  «Un método abstracto no tiene cuerpo; se declara únicamente con su firma y un punto y coma.»
+  Impone un "hueco obligatorio" que toda subclase no abstracta debe rellenar.
+
+- INTERFAZ (JLS Java SE 25, Capítulo 9):
+  «Una declaración de interfaz introduce un nuevo tipo de referencia cuyos miembros son clases,
+  interfaces, constantes y métodos (abstractos, default o estáticos).»
+  Representa un contrato de capacidades o roles independientes de la jerarquía de herencia.
+
+Analogía con la cafetería:
+- Clase abstracta: `Entrega` (todo pedido tiene un ID de pedido y un costo, pero el cálculo
+  exacto del costo depende de si es en mesa, para llevar o a domicilio).
+- Interfaz: `Rastreable` (es un contrato de habilidad: no todo lo que se entrega se rastrea,
+  pero un Domicilio firma el contrato de ser rastreable en tiempo real).
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: TABLA COMPARATIVA ABSTRACTA VS INTERFAZ
+--------------------------------------------------------------------------------
+Diferencias arquitectónicas esenciales:
+
+┌────────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ Característica             │ Clase Abstracta            │ Interfaz                   │
+├────────────────────────────┼────────────────────────────┼────────────────────────────┤
+│ Instanciación con new      │ NUNCA                      │ NUNCA                      │
+│ Herencia múltiple          │ NO (herencia simple)       │ SÍ (múltiples interfaces)  │
+│ Atributos de instancia     │ SÍ (privados, protegidos)  │ NO (solo public static     │
+│                            │                            │     final / constantes)    │
+│ Constructores              │ SÍ (para sus subclases)    │ NO                         │
+│ Métodos con cuerpo         │ SÍ (métodos ordinarios)    │ SÍ (métodos default/static)│
+│ Relación semántica         │ Identidad («es un tipo de»)│ Rol/Capacidad («hace de /  │
+│                            │                            │               se comporta»)│
+└────────────────────────────┴────────────────────────────┴────────────────────────────┘
+
+Métodos Default en Interfaces (Java 8+ a Java 25):
+Permiten añadir métodos con implementación por defecto dentro de una interfaz sin romper
+las clases que ya la implementaban. Ejemplo: `default boolean entregado() { return "entregado".equals(estado()); }`.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Diseño de MedioDePago (Solución de Julián):
+- Interfaz `MedioDePago` define `String nombre();` y `boolean pagar(int valor);`.
+- `Efectivo` siempre devuelve `true`.
+- `Billetera` descuenta de su saldo interno y devuelve `false` si los fondos son insuficientes.
+- El método `cobrar(MedioDePago m, int valor)` de la caja programa CONTRA LA INTERFAZ:
+  no le importa si es Efectivo, Billetera o Criptomoneda, la caja solo pide `m.pagar(valor)`.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: EL PODER DE LAS INTERFACES EN LA ARQUITECTURA
+--------------------------------------------------------------------------------
+- Frameworks modernos (Spring, Quarkus, Java SE):
+  Todo el ecosistema empresarial se basa en programar contra interfaces (`List`, `Map`, `Repository`).
+  Esto desacopla a los componentes y permite cambiar proveedores de bases de datos o servicios
+  externos sin tocar una sola línea de lógica comercial.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué no se puede hacer con una clase abstracta?
+  a) Heredar de ella
+  b) Crear objetos con new
+  c) Tener atributos
+  d) Tener métodos concretos
+RESPUESTA CORRECTA: b) Crear objetos con new
+JUSTIFICACIÓN:
+Por definición del lenguaje, una clase abstracta está incompleta en su diseño y el compilador
+bloquea cualquier intento de instanciarla directamente mediante `new`.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Una clase puede implementar varias interfaces a la vez."
+  [V]  [F]
+RESPUESTA CORRECTA: VERDADERO (V)
+JUSTIFICACIÓN:
+Java permite y promueve la implementación múltiple de interfaces (`implements A, B, C`),
+permitiendo que una clase cumpla varios contratos y asuma múltiples roles simultáneamente.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada palabra con su función:
+  - abstract    ---> Plantilla o método sin cuerpo
+  - interface   ---> Declara un contrato
+  - implements  ---> Firma un contrato
+  - default     ---> Método con cuerpo en una interfaz
+JUSTIFICACIÓN:
+`abstract` define la ausencia de cuerpo; `interface` agrupa declaraciones contractuales;
+`implements` es la cláusula con la que una clase adopta el contrato; y `default` define
+métodos con implementación opcional en interfaces.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los pasos para agregar un nuevo medio de pago:
+  [1] Leer la interfaz MedioDePago
+  [2] Crear la clase que la implementa
+  [3] Escribir nombre() y pagar()
+  [4] Agregar un objeto a la lista de medios
+  [5] Ejecutar y comparar la salida
+JUSTIFICACIÓN:
+Primero se conoce el contrato (la interfaz); se define la clase con `implements`; se implementan
+los métodos abstractos obligatorios; se utiliza la nueva clase en el sistema; y se comprueba su funcionamiento.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+El compilador dice: "Postre is not abstract and does not override abstract method…". ¿Qué falta?
+  a) Un constructor
+  b) Escribir el método abstracto en Postre
+  c) Un import
+  d) Quitar extends
+RESPUESTA CORRECTA: b) Escribir el método abstracto en Postre
+JUSTIFICACIÓN:
+Toda clase concreta que extiende una superclase abstracta adquiere el compromiso de implementar
+todos y cada uno de los métodos abstractos heredados.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué la caja funciona con un medio de pago nuevo sin cambiar el método cobrar.
+RESPUESTA Y JUSTIFICACIÓN:
+Porque la caja está desacoplada de las clases concretas: depende de la abstracción `MedioDePago`.
+El método `cobrar` solo interactúa con los métodos definidos en la interfaz (`pagar`).
+Cualquier clase futura que implemente `MedioDePago` es automáticamente compatible
+sin requerir un solo cambio en el código de la caja (Principio Abierto/Cerrado).
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Ana quiere convertir Producto en interfaz. ¿Qué perdería? ¿Qué ganaría? Decide y justifica.
+RESPUESTA Y JUSTIFICACIÓN:
+- Qué perdería: Perdería los atributos de estado compartidos (`nombre`, `precio`), obligando a que
+  cada clase concreta (`Bebida`, `Postre`, `Snack`) tenga que declarar, guardar y validar esos
+  atributos por su cuenta, generando duplicación de código. También perdería los constructores comunes.
+- Qué ganaría: Flexibilidad extrema para que clases con cualquier otra jerarquía puedan ser productos.
+- Decisión: En este dominio, `Producto` debe seguir siendo CLASE ABSTRACTA, porque todas las
+  mercancías del café comparten una identidad y un estado base idéntico.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe la interfaz Imprimible con String texto() y un default void imprimir() que lo muestre.
+RESPUESTA Y CÓDIGO:
+```java
+public interface Imprimible {
+    String texto();
+
+    default void imprimir() {
+        IO.println("[Ticket Impreso]: " + texto());
+    }
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 05 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en abstract, interface, implements, default e instanceof con patrones.
+- Mapa conceptual:
+  Contratos en Java 25
+    ├── Clases Abstractas: base compartida incompleta, contiene estado e impone métodos
+    ├── Interfaces: contratos puros de rol, soportan herencia múltiple
+    └── Métodos default: reutilización de algoritmos en contratos sin romper implementaciones
+- Insignia obtenida: «Guardafirmas de la barra».
+================================================================================

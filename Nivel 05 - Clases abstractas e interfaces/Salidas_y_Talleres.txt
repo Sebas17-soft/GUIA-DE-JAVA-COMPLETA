@@ -1,0 +1,82 @@
+================================================================================
+NIVEL 05: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 05 - Clases abstractas e interfaces $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: CLASE ABSTRACTA E INTERFAZ ===
+Latte $9500 (4 min)
+Cheesecake $12000 (1 min)
+Extra shot: +$2000
+
+=== DEMOSTRACION SESION 04: MEDIOS DE PAGO (CONTRATO) ===
+Pagando $15000 con Efectivo: true
+Pagando $15000 con Billetera Digital: true
+Segundo intento con billetera: false
+
+=== DEMOSTRACION SESION 06: GALLETA DESCONTABLE ===
+Galleta Avena y Miel lista para comer: true
+Precio normal: $4000 · Con 20% descuento: $3200
+
+=== DEMOSTRACION SESION 07: ENTREGAS Y RASTREO ===
+Pedido #101 · Costo entrega: $0 (mesa 3)
+Pedido #102 · Costo entrega: $500
+Pedido #103 · Costo entrega: $6000 (domicilio 5 km)
+  Estado inicial: preparando · ¿Entregado?: false
+  Tras avanzar 1: en camino
+  Tras avanzar 2: entregado · ¿Entregado?: true
+
+=== DEMOSTRACION PREGUNTA 8 (S08): DEFAULT EN INTERFAZ ===
+[Ticket Impreso]: Café Sintaxis · Gracias por su compra
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: Si intentas hacer `new Producto("Tinto", 3000)`, ¿qué dice el compilador?
+- Respuesta: Emite error de compilación: `Producto is abstract; cannot be instantiated`.
+
+PREDICCIÓN 2:
+- Pregunta: ¿Qué pasa si llamamos extra("shot extra") en un Postre?
+- Respuesta: Postre no implementa `Personalizable`, por lo que el método no existe para él.
+  El operador seguro `instanceof Personalizable p` previene el error en tiempo de ejecución.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (GALLETA Y DESCONTABLE)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[implements, abstract, interface, extends, default, @Override, boolean, int, Snack, Descontable]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ interface        │ Declara el contrato Descontable con precioConDescuento.     │
+│ 2       │ abstract         │ Declara la clase Snack como plantilla incompleta.           │
+│ 3       │ boolean          │ Tipo de retorno del método abstracto listoParaComer.        │
+│ 4       │ extends          │ Galleta hereda de la clase abstracta Snack.                 │
+│ 5       │ implements       │ Galleta adopta el contrato de la interfaz Descontable.      │
+│ 6       │ @Override        │ Confirma la implementación del método obligatorio del padre.│
+│ 7       │ Descontable      │ Referencia de interfaz para aplicar polimorfismo en Main.   │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (FORMAS DE ENTREGA Y DOMICILIOS)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `Entrega` (clase abstracta): campo `pedidoId`, método abstracto `costo()`, método concreto `resumen()`.
+2. `EnMesa extends Entrega`: costo 0.
+3. `ParaLlevar extends Entrega`: costo $500 por empaque.
+4. `Rastreable` (interfaz): métodos `estado()`, `avanzar()`, y `default boolean entregado()`.
+5. `Domicilio extends Entrega implements Rastreable`:
+   - Costo: $2000 base + ($800 × km).
+   - Estado evoluciona: "preparando" -> "en camino" -> "entregado".
+   - `entregado()` devuelve `true` exactamente cuando el estado es "entregado".
+================================================================================

@@ -1,0 +1,84 @@
+================================================================================
+NIVEL 07: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 07 - Principios SOLID $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: SOLID EN LA CAJA ===
+TICKET · total $18000
+[SMS] Cobro de $18000
+TICKET · total $12000
+[SMS] Cobro de $12000
+Saldo en caja: $30000
+
+=== DEMOSTRACION SESION 04: PRUEBAS CON DOBLE EN MEMORIA ===
+TICKET · total $8000
+Mensajes en memoria para auditoría: 1
+  Auditado: Cobro de $8000
+
+=== DEMOSTRACION SESION 06: COCINA E IMPRESORA ===
+[impresora] Mesa 4: Sándwich de pollo
+
+=== DEMOSTRACION SESION 07: REPORTE DIARIO SOLID ===
+CIERRE DEL DIA: 3 ventas · Total: $38000
+ventas;total
+3;38000
+
+=== DEMOSTRACION PREGUNTA 8 (S08): HORA FELIZ ===
+Cuenta: $30000 · Con Hora Feliz (30% menos): $21000
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Afecta a la clase Caja si cambiamos la forma en que el ticket formatea el texto?
+- Respuesta: NO afecta en absoluto. La responsabilidad del formato pertenece exclusivamente a Ticket (SRP).
+
+PREDICCIÓN 2:
+- Pregunta: ¿Qué pasa si agregamos un nuevo tipo de descuento como HoraFeliz? ¿Debemos modificar Caja?
+- Respuesta: NO se modifica Caja ni una sola línea. Caja solo invoca `d.aplicar(total)` (OCP).
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (COCINA E IMPRESORA)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[extends, Cocina, Impresora, print, class, impresora, String, implements, interface, ImpresoraConsola, final, imprimir]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ interface        │ Declara el contrato Impresora con el método imprimir.       │
+│ 2       │ implements       │ ImpresoraConsola firma el contrato de la interfaz.          │
+│ 3       │ final            │ La dependencia impresora es inmutable y obligatoria.        │
+│ 4       │ Impresora        │ Tipo de la abstracción recibida en el constructor.          │
+│ 5       │ impresora        │ Asignación del parámetro inyectado al campo de instancia.   │
+│ 6       │ imprimir         │ Invocación polimórfica del método de la impresora.          │
+│ 7       │ ImpresoraConsola │ Creación de la instancia concreta inyectada desde Main.     │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Qué principio SOLID aplica Cocina al recibir la impresora en el constructor?
+   Respuesta: Aplica el Principio de Inversión de Dependencias (DIP): depende de una interfaz abstracta
+   y recibe su implementación desde afuera, facilitando pruebas con impresoras falsas.
+
+2. Pregunta: Si en el espacio 3 quitas final, ¿sigue funcionando? ¿Qué protección pierdes?
+   Respuesta: Sigue compilando y corriendo, pero pierdes la garantía de inmutabilidad: cualquier método
+   podría reasignar la impresora por error en tiempo de ejecución.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (REPORTE DEL CIERRE)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `Totales`: única responsabilidad de calcular acumulación de dinero y conteo de ventas.
+2. `Formato` (interfaz): abierta a la extensión con `FormatoTexto` y `FormatoCsv`.
+3. `Destino` (interfaz): inyección de salida con `DestinoConsola`.
+4. `ReporteDiario`: orquesta el reporte recibiendo sus dependencias por constructor.
+================================================================================

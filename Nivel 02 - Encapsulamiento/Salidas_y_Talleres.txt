@@ -1,0 +1,103 @@
+================================================================================
+NIVEL 02: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 02 - Encapsulamiento $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: CAJA ===
+2 ventas · saldo $26000
+Rechazado: Cobro inválido: -500
+Saldo: $26000
+
+=== DEMOSTRACION SESION 04: PRODUCTO ENCAPSULADO ===
+Latte $9500
+Rechazado: Precio fuera de rango: -9500
+Sigue en $9500
+
+=== DEMOSTRACION SESION 06: TARJETA REGALO ===
+¿Pagó latte? true
+¿Pagó torta? false
+Saldo: $20500
+
+=== DEMOSTRACION SESION 07: BOTE DE PROPINAS ===
+Total aportado: $10500 en 3 aportes
+Rechazado: Aporte inválido: -100
+Reparto entre 3 personas: $3500 c/u · En bote queda: $0
+
+=== DEMOSTRACION PREGUNTA 8 (S08): TERMO ===
+Termo con 5L (5000 ml)
+Tras servir 350 ml quedan: 4650 ml
+Rechazado: No hay suficiente café: quedan 4650 ml
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM (PREDECIR ANTES DE MIRAR LA TERMINAL)
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Qué imprime la línea 9? Cuenta ventas y suma el saldo.
+- Respuesta predicha y verificada: Imprime `2 ventas · saldo $26000`.
+- Justificación: Se ejecutaron dos cobros válidos: 19000 + 7000 = 26000, con 2 transacciones.
+
+PREDICCIÓN 2:
+- Pregunta: ¿Se ejecuta saldo += valor cuando el cobro es −500? ¿Cómo lo sabes?
+- Respuesta predicha y verificada: NO se ejecuta.
+- Justificación: La condición `if (valor <= 0)` lanza `IllegalArgumentException` inmediatamente,
+  transfiriendo el flujo de ejecución fuera del bloque normal hacia el bloque `catch`.
+
+PREDICCIÓN 3:
+- Pregunta: ¿Qué saldo imprime la última línea? ¿Cambió por el cobro rechazado?
+- Respuesta predicha y verificada: Imprime `Saldo: $26000`. No cambió en absoluto.
+
+PREDICCIÓN 4:
+- Pregunta: Si quitas las barras // de la línea 12 (caja.saldo = 0;), ¿el programa corre?
+- Respuesta predicha y verificada: NO compila. Emite el error de compilación:
+  `Caja.java:12: error: saldo has private access in Caja`.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (CLASE TARJETA REGALO)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[getSaldo (x2), int, IllegalArgumentException, void, >=, boolean, setSaldo, private, public, <=, return]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida          │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ private                  │ Oculta el saldo para que nadie lo altere directamente.      │
+│ 2       │ getSaldo                 │ Define el getter público para consultar el saldo disponible.│
+│ 3       │ <=                       │ Condición que detecta recargas no positivas (0 o menos).    │
+│ 4       │ IllegalArgumentException │ Excepción estándar arrojada ante recargas inválidas.        │
+│ 5       │ boolean                  │ Tipo de retorno del método pagar (informa si alcanzó o no). │
+│ 6       │ return                   │ Devuelve true tras descontar exitosamente el cobro.         │
+│ 7       │ getSaldo                 │ Llamada en Main para imprimir el saldo restante.            │
+└─────────┴──────────────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Qué pasaría con el invariante si en el espacio 1 escribes public? Da un ejemplo de línea que rompería la tarjeta.
+   Respuesta: Si fuera `public`, cualquier parte del código podría hacer `tarjeta.saldo = -10000;` o `tarjeta.saldo = 1000000;`,
+   rompiendo el invariante de saldo legítimo sin pagar ni recargar.
+
+2. Pregunta: Si en el espacio 3 usas < en lugar de <=, ¿qué recarga extraña se acepta?
+   Respuesta: Se aceptaría una recarga de $0 (`valor = 0`), lo cual carece de sentido financiero y consumiría recursos sin aportar fondos.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (BOTE DE PROPINAS)
+--------------------------------------------------------------------------------
+Requisitos implementados en BotePropinas.java:
+1. Atributos privados: `int total` e `int aportes`.
+2. Método `void aportar(int valor)`: Valida `valor > 0`; acumula y cuenta.
+3. Método `int repartir(int personas)`: Valida `personas >= 1`; divide equitativamente mediante división entera.
+4. Getters: `getTotal()` y `getAportes()`. Sin setters para proteger el dinero.
+5. Método extra `sobrante(int personas)` con el operador `%` (residuo).
+
+Casos de prueba verificados:
+- Aportes: $2000, $5000, $3500 -> Total: $10,500 en 3 aportes.
+- Intento de aportar -$100 -> Atrapado por excepción: "Aporte inválido: -100".
+- Reparto entre 3 personas: 10500 / 3 = $3500 por persona; sobrante: $0.
+================================================================================

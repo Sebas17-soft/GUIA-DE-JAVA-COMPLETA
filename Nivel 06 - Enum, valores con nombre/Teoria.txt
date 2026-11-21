@@ -1,0 +1,190 @@
+================================================================================
+NIVEL 06: ENUM: VALORES CON NOMBRE · TAMAÑOS Y ESTADOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo evito tamaños y estados mal escritos en el sistema?
+- Contexto de Café Sintaxis:
+  Anteriormente, los tamaños ("grande", "Grande", "G") y los estados de pedidos y mesas
+  ("libre", "ocupada", "pagado") se escribían como cadenas de texto (`String`).
+  Cualquier error de tipeo provocaba que una comanda no avanzara o que se aplicara un precio
+  erróneo. Valeria exige una lista cerrada de valores válidos garantizada en tiempo de compilación.
+- Objetivos de aprendizaje:
+  1. Comprender la declaración y semántica de tipos enumerados (`enum`) según la JLS.
+  2. Asociar campos, constructores y métodos a constantes de enum.
+  3. Utilizar métodos estándar de enum: `values()`, `ordinal()`, `name()`, `valueOf()`.
+  4. Implementar expresiones switch exhaustivas con flechas (`->`) sin necesidad de `default`.
+  5. Optimizar colecciones basadas en enum con `EnumMap` y `EnumSet`.
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS (JAVA SE 25)
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- ENUM (JLS Java SE 25, §8.9):
+  «Una clase enum es una clase que tiene un número fijo de instancias, cada una de las cuales
+  corresponde a una de las constantes declaradas en el cuerpo del enum.»
+  En Java, a diferencia de C/C++, los enums son tipos orientados a objetos completos:
+  heredan de `java.lang.Enum`, pueden tener constructores privados, campos `final` y métodos.
+
+- INMUTABILIDAD Y CONSTRUCTOR PRIVADO:
+  Los constructores de un enum son implícitamente `private`. No es posible instanciar un enum
+  desde fuera mediante `new`. El conjunto de constantes queda sellado para siempre.
+
+- MÉTODOS NATIVOS DE ENUM:
+  * `values()`: Devuelve un array con todas las constantes en el orden exacto en que fueron declaradas.
+  * `ordinal()`: Devuelve la posición numérica entera de la constante (empezando en 0).
+  * `name()`: Devuelve el identificador textual exacto de la constante.
+  * `valueOf(String)`: Busca y devuelve la constante correspondiente al texto exacto; si no coincide,
+    lanza `IllegalArgumentException`.
+
+Analogía con la cafetería:
+Los tamaños de los vasos en la barra son exactamente tres: PEQUEÑO, MEDIANO y GRANDE.
+No existe "mediano y medio" ni "gigante". Declararlo como `enum` garantiza que nadie
+en el sistema pueda pedir un vaso inexistente.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: SWITCH EXHAUSTIVO Y ENUMMAP
+--------------------------------------------------------------------------------
+Switch de Flechas Exhaustivo (Java 14+ a Java 25):
+Cuando se evalúa un `enum` en un switch que cubre TODOS los valores declarados, el compilador
+sabe que es exhaustivo y NO exige la rama `default`.
+Ventaja clave: Si en el futuro agregas un nuevo estado (ej. `CANCELADO`), el compilador
+marcará error inmediatamente en todos los switches incompletos, forzándote a manejar el nuevo
+caso y previniendo olvidos lógicos.
+
+EnumMap:
+Estructura de mapa de alto rendimiento implementada internamente como un array plano,
+aprovechando el índice `ordinal()` del enum. Es muchísimo más rápida y eficiente en memoria
+que un `HashMap`, manteniendo las claves ordenadas según la definición del enum.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Tamano.java:
+- `PEQUENO(240, 0)`, `MEDIANO(350, 1500)`, `GRANDE(470, 2800)`.
+- Cada constante lleva asociados sus mililitros y su recargo económico.
+- Permite calcular precios y servir bebidas con precisión matemática.
+
+EstadoPedido.java:
+- Máquina de estados: `RECIBIDO -> EN_PREPARACION -> LISTO -> ENTREGADO`.
+- Método `siguiente()` implementado con switch de flechas limpio.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: EL ERROR DE PERSISTIR ORDINAL()
+--------------------------------------------------------------------------------
+- Riesgo de `ordinal()`: Si guardas el orden de un enum (0, 1, 2) en una base de datos o archivo,
+  y semanas después alguien inserta un nuevo tamaño al inicio o reordena las constantes,
+  todos los registros históricos cambiarán de significado silenciosamente.
+  En sistemas reales, siempre se persiste el `name()` o un código alfanumérico explícito.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué método devuelve todas las constantes de un enum en orden?
+  a) valueOf()
+  b) values()
+  c) ordinal()
+  d) name()
+RESPUESTA CORRECTA: b) values()
+JUSTIFICACIÓN:
+El método estático `values()` generado por el compilador retorna una matriz con todos
+los valores constantes definidos en el enum en su orden de declaración.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Desde otra clase se puede crear un tamaño nuevo con new Tamano(600, 4000)."
+  [V]  [F]
+RESPUESTA CORRECTA: FALSO (F)
+JUSTIFICACIÓN:
+Los constructores de los enums son estrictamente privados. El compilador de Java prohíbe
+terminantemente el uso de `new` con tipos enumerados.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada expresión con su resultado:
+  - Tamano.GRANDE.ml()        ---> 470
+  - Tamano.MEDIANO.ordinal()  ---> 1
+  - Tamano.PEQUENO.name()     ---> "PEQUENO"
+  - Tamano.values().length    ---> 3
+JUSTIFICACIÓN:
+El tamaño grande tiene 470 ml; mediano está en el índice 1 (tras pequeño en 0);
+el nombre textual de PEQUENO es "PEQUENO"; y hay 3 tamaños en total.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los estados que recorre un pedido:
+  [1] RECIBIDO
+  [2] EN_PREPARACION
+  [3] LISTO
+  [4] ENTREGADO
+JUSTIFICACIÓN:
+Es el ciclo de vida natural de una comanda en la cafetería desde que el cliente la ordena
+hasta que la recoge en el mostrador.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+Tamano.valueOf("Grande") lanza una excepción. ¿Por qué?
+  a) Falta new
+  b) El nombre debe coincidir exacto: GRANDE
+  c) valueOf solo acepta números
+  d) Los enums no tienen valueOf
+RESPUESTA CORRECTA: b) El nombre debe coincidir exacto: GRANDE
+JUSTIFICACIÓN:
+`valueOf` distingue mayúsculas de minúsculas y exige coincidencia exacta con el identificador
+declarado en el código fuente Java. "Grande" no existe, el valor real es "GRANDE".
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué agregar el estado CANCELADO hace que el switch de siguiente() deje de compilar, y por qué eso es bueno.
+RESPUESTA Y JUSTIFICACIÓN:
+El switch de `siguiente()` fue escrito sin `default` para garantizar exhaustividad.
+Al agregar una nueva constante `CANCELADO`, el compilador detecta de inmediato que el switch
+no cubre todas las posibilidades del enum y se niega a compilar (`error: the switch statement does not cover all possible input values`).
+Esto es excelente porque convierte un potencial error de lógica en tiempo de ejecución en
+una advertencia inmediata en tiempo de compilación, señalando con exactitud quirúrgica
+dónde falta gestionar el nuevo estado.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Martín quiere guardar los tamaños como 1, 2 y 3 en un archivo. ¿Qué le recomiendas? Justifica con ordinal().
+RESPUESTA Y JUSTIFICACIÓN:
+Se le recomienda firmemente NO usar números ni `ordinal()`. El valor devuelto por `ordinal()`
+es volátil: depende únicamente de la posición en el código fuente. Si mañana el equipo agrega
+un tamaño "MINI" al principio, el ordinal de PEQUEÑO pasará de 0 a 1, corrompiendo todos
+los datos guardados previamente. Debe guardarse el nombre textual `name()` o un código fijo de negocio.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe un enum MedioPago con un atributo comisionPct y un método neto(int valor).
+RESPUESTA Y CÓDIGO:
+```java
+public enum MedioPago {
+    EFECTIVO(0),
+    TARJETA(2),
+    BILLETERA(1);
+
+    private final int comisionPct;
+
+    MedioPago(int comisionPct) {
+        this.comisionPct = comisionPct;
+    }
+
+    public int neto(int valor) {
+        return valor * (100 - comisionPct) / 100;
+    }
+
+    public int getComisionPct() {
+        return comisionPct;
+    }
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 06 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en enum con datos, switch exhaustivo, values(), ordinal() y EnumMap.
+- Mapa conceptual:
+  Enum en Java
+    ├── Conjunto cerrado de constantes inmutables
+    ├── Atributos y constructores privados
+    ├── Switch exhaustivo de flechas sin default
+    └── Colecciones optimizadas (EnumMap / EnumSet)
+- Insignia obtenida: «Guardián/a de la lista cerrada».
+================================================================================

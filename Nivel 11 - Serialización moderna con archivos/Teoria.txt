@@ -1,0 +1,192 @@
+================================================================================
+NIVEL 11: SERIALIZACIÓN MODERNA CON ARCHIVOS · LA CAFETERÍA RECUERDA
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo recuerda la cafetería su estado al día siguiente?
+- Contexto de Café Sintaxis:
+  Cada vez que la aplicación se cerraba o la máquina se apagaba por la noche, todos los
+  datos en memoria (inventario de bodega, comensales, reservas) se borraban.
+  Martín tenía que volver a digitar todo en la mañana. Además, la deserialización clásica
+  en Java históricamente tenía graves riesgos de seguridad de inyección de objetos.
+  Valeria pide persistencia real en disco: almacenamiento binario ultra-rápido protegido con
+  filtros de deserialización (JEP 290) y exportación en texto plano CSV para la contadora.
+- Objetivos de aprendizaje:
+  1. Comprender la serialización en Java: transformación de un grafo de objetos a una secuencia de bytes (`Serializable`).
+  2. Implementar `ObjectOutputStream` y `ObjectInputStream` con `try-with-resources`.
+  3. Comprender por qué los records son naturalmente más seguros para serializar (inmutabilidad y constructor canónico).
+  4. Aplicar filtros de deserialización estrictos (`ObjectInputFilter`) con listas blancas cerradas (`!*`).
+  5. Manejar archivos con la API moderna `java.nio.file.Files` y `Path`.
+  6. Diseñar persistencia dual: binario (`.ser`) para el sistema y texto delimitado (`.csv`) para interoperabilidad.
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS Y JAVA SE 25
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- SERIALIZACIÓN (Java Object Serialization Specification):
+  «La serialización de objetos extiende la API de flujos de entrada/salida para soportar
+  la codificación de objetos y de los objetos alcanzables desde ellos a un flujo de bytes.»
+  Para que un objeto sea serializable, su clase o record debe marcarse con la interfaz
+  etiquetadora `java.io.Serializable`.
+
+- SEGURIDAD Y JEP 290 (ObjectInputFilter):
+  «Permite a los flujos de entrada de objetos filtrar clases de manera previa a la instanciación,
+  rechazando cualquier clase no autorizada antes de leerla.»
+  Regla de oro: Toda lista blanca debe terminar en `!*` (rechazar todo lo demás), impidiendo
+  ataques de ejecución remota de código (RCE).
+
+- SERIALIZACIÓN DE RECORDS (Java SE 25):
+  A diferencia de las clases tradicionales que reconstruyen objetos mediante reflexión
+  bypasseando constructores, los records SE RECONSTRUYEN INVOCANDO OBLIGATORIAMENTE SU
+  CONSTRUCTOR CANÓNICO.
+  Consecuencia vital: Si alguien adultera los bytes de un archivo `.ser` para poner una
+  cantidad negativa en un `Insumo`, el constructor compacto del record vuelve a ejecutarse
+  durante la lectura y rechaza la carga con `IllegalArgumentException`.
+
+Analogía con la cafetería:
+- Serializar es empaquetar al vacío los insumos y sellar la bodega con candado al cerrar la noche.
+- Deserializar con filtro es pasar el paquete por el escáner de rayos X en la puerta:
+  si contiene algo no autorizado, la compuerta de seguridad se bloquea de inmediato.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: BINARIO (.SER) VS TEXTO (.CSV)
+--------------------------------------------------------------------------------
+Tabla comparativa de persistencia:
+
+┌────────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ Criterio                   │ Serialización (.ser)       │ Archivo de Texto (.csv)    │
+├────────────────────────────┼────────────────────────────┼────────────────────────────┤
+│ Formato                    │ Bytes binarios nativos     │ Texto UTF-8 delimitado     │
+│ Interoperabilidad          │ Solo entornos Java         │ Universal (Excel, Python)  │
+│ Preserva tipos y grafos    │ SÍ (automático)            │ NO (requiere parseo manual)│
+│ Velocidad de E/S           │ Muy alta                   │ Media (costo de parsing)   │
+│ Legible por humanos        │ NO                         │ SÍ                         │
+│ Seguridad requerida        │ ObjectInputFilter          │ Validación en parseo       │
+└────────────────────────────┴────────────────────────────┴────────────────────────────┘
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Almacen.java y Filtro de Seguridad:
+```java
+private static final String PERMITIDOS = "Insumo;java.util.ArrayList;java.lang.Object;!*";
+
+try (var in = new ObjectInputStream(Files.newInputStream(archivo))) {
+    in.setObjectInputFilter(ObjectInputFilter.Config.createFilter(PERMITIDOS));
+    return (List<Insumo>) in.readObject();
+}
+```
+El filtro analiza los metadatos de cada objeto antes de cargarlo en el montículo. Si aparece
+una clase desconocida, arroja `InvalidClassException: filter status: REJECTED`.
+
+Uso de Try-with-resources:
+Garantiza que el flujo hacia el archivo en el sistema operativo se cierre inmediatamente
+al terminar el bloque, incluso si se produce un fallo o excepción (`IOException`), liberando
+el descriptor del fichero.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: PERSISTENCIA EN EL DESARROLLO DE SOFTWARE
+--------------------------------------------------------------------------------
+- La persistencia es el puente entre la computación transitoria en memoria volátil (RAM)
+  y el almacenamiento duradero en disco duro o SSD.
+- Desde guardados locales en formato CSV/JSON hasta bases de datos distribuidas y clusters
+  de mensajería, todo sistema empresarial se apoya en serializar y deserializar estado de negocio.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué interfaz debe implementar un record para guardarse con ObjectOutputStream?
+  a) Comparable
+  b) Serializable
+  c) AutoCloseable
+  d) Cloneable
+RESPUESTA CORRECTA: b) Serializable
+JUSTIFICACIÓN:
+`Serializable` es la interfaz marcadora de la biblioteca estándar que autoriza a la máquina
+virtual a transcribir la estructura y datos del objeto a un flujo binario.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Al deserializar un record, Java usa su constructor canónico, así que la validación vuelve a correr."
+  [V]  [F]
+RESPUESTA CORRECTA: VERDADERO (V)
+JUSTIFICACIÓN:
+Por diseño de la especificación de Records en Java, la reconstrucción deserializada no
+elude el constructor canónico ni el constructor compacto. Todas las comprobaciones de negocio
+se ejecutan nuevamente, impidiendo la inyección de estados inválidos desde archivos corruptos.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada herramienta con su función:
+  - writeObject     ---> Objetos a bytes
+  - readObject      ---> Bytes a objetos
+  - try (var …)     ---> Cierra el flujo solo
+  - !* en el filtro ---> Rechaza todo lo demás
+JUSTIFICACIÓN:
+`writeObject` serializa; `readObject` deserializa; `try(...)` asegura el cierre determinista;
+y `!*` actúa como comodín de rechazo por defecto en listas blancas de seguridad.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los pasos de `cargar()`:
+  [1] Revisar si el archivo existe
+  [2] Abrir el ObjectInputStream en un try
+  [3] Poner el filtro de clases
+  [4] Leer el objeto
+  [5] Devolver la lista
+JUSTIFICACIÓN:
+Verificación de archivo existente (evitar excepción `NoSuchFileException`), apertura segura del stream,
+configuración del filtro de seguridad ANTES de la lectura, lectura mediante `readObject()` y retorno del valor.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+Aparece `InvalidClassException: filter status: REJECTED`. ¿Qué pasó?
+  a) El disco está lleno
+  b) El archivo trae una clase que no está en la lista blanca
+  c) Falta Serializable en String
+  d) El archivo está vacío
+RESPUESTA CORRECTA: b) El archivo trae una clase que no está en la lista blanca
+JUSTIFICACIÓN:
+El `ObjectInputFilter` detectó una clase en el flujo binario que no coincide con los patrones
+permitidos o cae dentro de la regla de rechazo `!*`.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué el archivo con cantidad −3 se rechazó al leer, aunque nadie llamó a new Insumo en ese programa.
+RESPUESTA Y JUSTIFICACIÓN:
+Porque los records en Java garantizan que la deserialización SIEMPRE pasa por el constructor
+canónico (y por ende por el constructor compacto). Aunque el programador no haya escrito
+explícitamente `new Insumo(...)` en su código, la JVM invoca dicho constructor al leer los
+componentes del flujo binario. Al evaluar `cantidad < 0`, el constructor compacto arroja
+la excepción `IllegalArgumentException` y aborta la deserialización.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Valeria quiere mandar la bodega a su proveedor, que usa otro lenguaje. ¿.ser o .csv? Justifica con la tabla de S5.
+RESPUESTA Y JUSTIFICACIÓN:
+Debe mandar el archivo `.csv`. El archivo `.ser` es un formato binario propietario exclusivo
+de la máquina virtual de Java (JVM); un proveedor que utilice Python, C#, Node.js o Go no
+podrá deserializarlo de forma natural. El formato `.csv`, en cambio, es un estándar universal
+de texto plano delimitado que cualquier lenguaje de programación y herramienta ofimática
+(como Microsoft Excel o Google Sheets) puede procesar de inmediato.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe el filtro y la lectura para un archivo que solo debe traer un record Turno.
+RESPUESTA Y CÓDIGO:
+```java
+try (var in = new ObjectInputStream(Files.newInputStream(Path.of("turno.ser")))) {
+    in.setObjectInputFilter(ObjectInputFilter.Config.createFilter("Turno;!*"));
+    Turno t = (Turno) in.readObject();
+    IO.println("Turno recuperado: " + t);
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 11 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en serialización, ObjectInputStream/OutputStream, ObjectInputFilter y CSV.
+- Insignia obtenida: «Guardián/a de la memoria de la cafetería».
+- Explicación en 60 segundos:
+  "La serialización permite que Café Sintaxis preserve su inventario y reservas más allá
+  del apagado de la máquina. Al usar records combinados con ObjectInputFilter y listas blancas,
+  obtenemos un almacenamiento binario inmune a ataques de deserialización y a datos corruptos,
+  complementado con exportaciones CSV para compartir información con el resto del mundo."
+================================================================================

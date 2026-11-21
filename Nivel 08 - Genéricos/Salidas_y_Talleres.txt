@@ -1,0 +1,85 @@
+================================================================================
+NIVEL 08: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 08 - Genéricos $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: REPOSITORIO GENERICO ACOTADO ===
+Producto id 1: #1 Latte ($9500)
+Suma precios: $16500
+Cliente id 102: Cliente #102: Martín
+
+=== DEMOSTRACION SESION 04: METODO GENERICO MAXIMO ===
+Venta máxima: $24000
+Alfabéticamente mayor: Tinto
+
+=== DEMOSTRACION SESION 06: BANDEJA GENERICA ===
+¿Cabe un tinto? false
+latte · 2
+
+=== DEMOSTRACION SESION 07: HISTORIAL DE LA BARRA ===
+Más reciente: Pedido #4: 1 Cappuccino
+Historial actual (capacidad 3): [Pedido #2: 1 Brownie, Pedido #3: 3 Tintos, Pedido #4: 1 Cappuccino]
+Total últimos cobros (sumar con comodín ? extends Number): $36500
+Conteo de 7000 en cobros: 1
+
+=== DEMOSTRACION PREGUNTA 8 (S08): METODO PRIMEROS ===
+Primeras 3 bebidas: [Latte, Espresso, Capuchino]
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Qué devuelve repoProductos.buscar(99) si el id no existe?
+- Respuesta: Devuelve `null`.
+
+PREDICCIÓN 2:
+- Pregunta: ¿Puede el método sumarPrecios recibir una List<Bebida>?
+- Respuesta: SÍ, porque `Bebida extends Producto` y el parámetro usa el comodín acotado `List<? extends Producto>`.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (BANDEJA GENÉRICA)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[Integer, String, T (x3), cantidad, E, <T>, size, ?, <>, Object]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ <T>              │ Declara el parámetro de tipo genérico en la clase Bandeja.  │
+│ 2       │ T                │ Tipo de los elementos almacenados en la lista interna.      │
+│ 3       │ <>               │ Operador diamante para inferir el tipo en el ArrayList.     │
+│ 4       │ T                │ Tipo del argumento recibido en el método poner.             │
+│ 5       │ T                │ Tipo de retorno del método primera() (retorna un T).        │
+│ 6       │ String           │ Tipo concreto especificado al instanciar la bandeja en Main.│
+│ 7       │ cantidad         │ Nombre del método accesor para consultar el total colocado. │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué los espacios 2, 4 y 5 llevan la misma letra T? ¿Qué pasaría si en el 5 escribes Object?
+   Respuesta: Llevan la misma letra porque representan exactamente el mismo tipo de dato consistente.
+   Si en el espacio 5 escribes `Object`, obligarías al llamador a castear manualmente el resultado
+   al extraerlo de la bandeja, perdiendo la seguridad y comodidad de los genéricos.
+
+2. Pregunta: Si en el espacio 6 escribes Integer, ¿qué línea deja de compilar?
+   Respuesta: Dejarían de compilar `b.poner("latte");` y `b.poner("moka");`, porque el compilador
+   exigiría números enteros y rechazaría cadenas de texto.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (HISTORIAL DE LA BARRA)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `Historial<T>` con capacidad fija `n`.
+2. Al llenarse la capacidad, descarta el más antiguo con `removeFirst()` (política FIFO).
+3. Método `masReciente()` que retorna `items.getLast()`.
+4. Método genérico `contar(List<T>, T)` con `equals`.
+5. Método comodín `sumar(List<? extends Number>)` que utiliza `intValue()`.
+================================================================================

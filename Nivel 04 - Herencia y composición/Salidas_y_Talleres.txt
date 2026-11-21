@@ -1,0 +1,93 @@
+================================================================================
+NIVEL 04: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 04 - Herencia y composición $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: POLIMORFISMO CON PRODUCTOS ===
+Latte $9500 · 350 ml
+Brownie $7000
+Torta Zanahoria $8500 · vegano
+
+=== DEMOSTRACION SESION 04: COMPOSICION CON PEDIDO ===
+Mesa 4
+  2 × Latte = $19000
+  1 × Brownie = $7000
+Total: $26000
+
+=== DEMOSTRACION SESION 06: TEMPORADA Y COMBO ===
+Ponqué de calabaza $8500 (solo octubre)
+Combo: $16200
+
+=== DEMOSTRACION SESION 07: NOMINA DEL TURNO ===
+Martín [base $50000, total $57000] -> Pago: $57000
+Laura [base $45000, total $63000] -> Pago: $63000
+Total nómina del turno: $120000
+
+=== DEMOSTRACION PREGUNTA 8 (S08): SUBCLASE TE ===
+Té Verde Matcha $8000 · 300 ml · origen: Japón
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Qué imprime latte.descripcion() y brownie.descripcion()?
+- Respuesta:
+  * latte: `Latte $9500 · 350 ml` (sobrescrito por Bebida).
+  * brownie: `Brownie $7000` (método de Postre con vegano=false reusando super).
+
+PREDICCIÓN 2:
+- Pregunta: En List<Producto>, ¿se pierde el tipo Bebida o sigue sabiendo sus ml?
+- Respuesta: La referencia en la lista es de tipo `Producto`, pero el objeto real en el Heap
+  sigue siendo `Bebida`, por lo que el polimorfismo invoca la versión con mililitros.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (TEMPORADA Y COMBO)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[super (x2), Object, Producto, getNombre, Bebida, getPrecio, this, extends, implements, @Override, Temporada]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ extends          │ Declara que Temporada hereda de la clase Producto.          │
+│ 2       │ super            │ Invoca el constructor del padre con nombre y precio.        │
+│ 3       │ @Override        │ Confirma que descripcion() sobrescribe el método del padre. │
+│ 4       │ super            │ Llama a super.descripcion() para reusar el texto base.      │
+│ 5       │ Producto         │ Tipo del atributo compuesto principal dentro de Combo.      │
+│ 6       │ getPrecio        │ Método accesor para obtener el precio del acompañante.      │
+│ 7       │ Temporada        │ Constructor invocado para instanciar el Ponqué de calabaza. │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué Combo no hereda de Producto? Usa la prueba «es un / tiene un».
+   Respuesta: Un Combo no es un producto individual simple; un Combo *tiene* dos productos
+   (un principal y un acompañante) con un descuento aplicado. Modelarlo por composición
+   es limpio y no fuerza herencias artificiales.
+
+2. Pregunta: Si en el espacio 4 escribes this en vez de super, ¿qué pasa al ejecutar?
+   Respuesta: Se produciría una recursión infinita (el método se llamaría a sí mismo sin fin)
+   desembocando en un error fatal `StackOverflowError`.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (NÓMINA DEL TURNO)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `Empleado`: campos `nombre` y `salarioBase`, método `pago()`, `toString()` sobrescrito.
+2. `Barista extends Empleado`: agrega `bebidas`, `pago()` suma 200 por bebida con `super.pago()`.
+3. `Mesero extends Empleado`: agrega `propinas`, `pago()` suma propinas a `super.pago()`.
+4. `Turno`: composición con `List<Empleado>`, método `totalNomina()`.
+
+Resultados verificados:
+- Martín (Barista): Base $50,000 + (35 × $200) = $57,000.
+- Laura (Mesero): Base $45,000 + $18,000 propinas = $63,000.
+- Total Nómina: $120,000.
+================================================================================

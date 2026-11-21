@@ -1,0 +1,93 @@
+================================================================================
+NIVEL 06: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 06 - Enum, valores con nombre $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: TAMANO Y ESTADOPEDIDO ===
+PEQUENO: 240 ml, +$0
+MEDIANO: 350 ml, +$1500
+GRANDE: 470 ml, +$2800
+1 EN_PREPARACION → En barra
+2 LISTO → ¡Listo para recoger!
+3 ENTREGADO → Entregado
+
+=== DEMOSTRACION SESION 04: CATEGORIAS Y ENUMMAP ===
+Bebida caliente: $145000
+Bebida fría: $0
+Postre y repostería: $68000
+Snack salado: $0
+
+=== DEMOSTRACION SESION 06: LECHES VEGETALES ===
+AVENA +$1500
+ALMENDRAS +$1800
+
+=== DEMOSTRACION SESION 07: PLANO DEL SALON (ESTADOMESA) ===
+Conteo inicial:
+  LIBRE: 3 (Mesa libre y disponible)
+  OCUPADA: 2 (Clientes en mesa)
+  POR_LIMPIAR: 1 (Pendiente por desinfectar)
+  RESERVADA: 1 (Apartada para reserva)
+  FUERA_DE_SERVICIO: 1 (Mantenimiento)
+
+=== DEMOSTRACION PREGUNTA 8 (S08): MEDIOPAGO NETO ===
+EFECTIVO (comisión 0%): Neto a recibir = $50000
+TARJETA (comisión 2%): Neto a recibir = $49000
+BILLETERA (comisión 1%): Neto a recibir = $49500
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿En qué número empieza e.ordinal() al iterar Tamano.values()?
+- Respuesta: Empieza en 0 (PEQUENO: 0, MEDIANO: 1, GRANDE: 2).
+
+PREDICCIÓN 2:
+- Pregunta: ¿Qué devuelve EstadoPedido.ENTREGADO.siguiente()?
+- Respuesta: Devuelve `ENTREGADO` (estado absorbente terminal).
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (ENUM LECHE)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[class, ordinal, switch, case, static, default, valueOf, final, enum, recargo, Leche, values]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ enum             │ Declara el tipo enumerado Leche.                            │
+│ 2       │ final            │ Hace que el campo recargo sea inmutable dentro de cada enum.│
+│ 3       │ Leche            │ Constructor del enum (mismo identificador del tipo).        │
+│ 4       │ switch           │ Inicia la expresión switch de flechas para evaluar this.    │
+│ 5       │ default          │ Rama que responde false para las leches de origen animal.   │
+│ 6       │ values           │ Método estático para iterar sobre todas las leches.         │
+│ 7       │ recargo          │ Método accesor para imprimir el costo extra de la leche.    │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué el switch del espacio 4 necesita el default del espacio 5? ¿Qué pasaría si escribes los 4 casos sin default?
+   Respuesta: Si listas explícitamente los 4 casos (`case ENTERA, DESLACTOSADA -> false; case AVENA, ALMENDRAS -> true;`),
+   el compilador reconoce que es exhaustivo y NO necesita `default`. Se usó `default` como atajo para agrupar todas
+   las demás opciones que no sean vegetales.
+
+2. Pregunta: Si en el espacio 6 escribes valueOf, ¿qué error esperas?
+   Respuesta: `error: method valueOf in enum Leche cannot be applied to given types`: `valueOf`
+   requiere un argumento `String`, no puede llamarse sin argumentos para iterar en un `for`.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (PLANO DEL SALÓN Y ESTADOMESA)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `EstadoMesa`: LIBRE, OCUPADA, POR_LIMPIAR, RESERVADA, FUERA_DE_SERVICIO con campo `aviso`.
+2. Método `siguiente()` con switch exhaustivo.
+3. Método `disponible()` que evalúa `this == LIBRE`.
+4. Conteo de mesas mediante `EnumMap<EstadoMesa, Integer>`.
+================================================================================

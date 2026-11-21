@@ -1,0 +1,159 @@
+================================================================================
+NIVEL 09: CRUD PASO A PASO CON ARRAYLIST · EL INVENTARIO DE LA BARRA
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo creo, leo, actualizo y borro insumos de la cafetería con ArrayList?
+- Contexto de Café Sintaxis:
+  La cafetería maneja insumos críticos (café en grano, leche, vasos, servilletas).
+  Llevar el stock en cuadernos ocasiona que se acabe la leche en plena hora pico.
+  Valeria pide un módulo de gestión de inventario completo que soporte las cuatro operaciones
+  fundamentales: Crear (Create), Leer (Read), Actualizar (Update) y Borrar (Delete),
+  garantizando que ninguna consulta devuelva punteros nulos (`null`) y protegiendo la lista interna.
+- Objetivos de aprendizaje:
+  1. Comprender la anatomía del acrónimo CRUD en software comercial.
+  2. Dominar `ArrayList` y sus operaciones: `add`, `get`, `set`, `removeIf`, `size`.
+  3. Utilizar `Optional<T>` para representar la posible ausencia de un valor sin recurrir a `null`.
+  4. Implementar copias defensivas inmutables con `List.copyOf(...)`.
+  5. Comprender la complejidad algorítmica: acceso por índice O(1) vs búsqueda lineal O(n).
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS Y JAVA SE 25
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- CRUD (Create, Read, Update, Delete):
+  Las cuatro operaciones básicas de almacenamiento persistente y manipulación de datos:
+  * Create: Insertar un nuevo registro asignando un identificador único autoincremental.
+  * Read: Consultar todos los registros (listado) o buscar un registro específico por ID.
+  * Update: Modificar los atributos mutables de un registro existente.
+  * Delete: Eliminar un registro de la colección mediante un predicado o identificador.
+
+- ARRAYLIST (Java SE 25 API, java.util.ArrayList):
+  «Implementación redimensionable de la interfaz List. Implementa todas las operaciones opcionales
+  de lista y permite todos los elementos, incluyendo null.»
+  Internamente se basa en un arreglo nativo que crece dinámicamente cuando se llena.
+
+- OPTIONAL (Java SE 25 API, java.util.Optional):
+  «Un objeto contenedor que puede o no contener un valor no nulo.»
+  Previene el "error del billón de dólares" (`NullPointerException`) al obligar al llamador
+  a contemplar explícitamente el caso en que el elemento buscado no exista.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: ESTRUCTURA INTERNA Y COMPLEJIDAD TEMPORAL
+--------------------------------------------------------------------------------
+Rendimiento en memoria:
+- `get(int index)`: Tiempo constante O(1). Accede directamente a la posición de memoria.
+- `buscar(int id)`: Búsqueda lineal O(n). En el peor de los casos debe recorrer toda la lista.
+- Copia defensiva con `List.copyOf(insumos)`:
+  Devuelve una lista inmutable. Si código externo intenta hacer `inv.listar().add(...)`,
+  Java lanza `UnsupportedOperationException`, impidiendo que terceros corrompan el inventario.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Inventario.java:
+- `siguienteId++`: Genera IDs únicos correlativos autoincrementales garantizados.
+- `Optional<Insumo> buscar(int id)`: Retorna `Optional.of(i)` o `Optional.empty()`.
+- `boolean borrar(int id)`: Implementado elegantemente con `insumos.removeIf(i -> i.getId() == id)`.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: ESCALABILIDAD EN LA INDUSTRIA
+--------------------------------------------------------------------------------
+- Para catálogos pequeños o medianos (cientos o miles de ítems), `ArrayList` es óptimo debido
+  a su contigüidad espacial en la memoria caché del procesador.
+- Para volúmenes masivos (millones de registros), la búsqueda por ID se delega en índices
+  `HashMap` O(1) o bases de datos SQL relacionales con árboles B+.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué significa la U de CRUD?
+  a) Usar
+  b) Update: actualizar
+  c) Unir
+  d) Undo: deshacer
+RESPUESTA CORRECTA: b) Update: actualizar
+JUSTIFICACIÓN:
+CRUD es el acrónimo universal para Create, Read, Update y Delete.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"get(i) en un ArrayList tarda más cuanto más grande es la lista."
+  [V]  [F]
+RESPUESTA CORRECTA: FALSO (F)
+JUSTIFICACIÓN:
+El acceso por índice en `ArrayList` es en tiempo constante O(1), ya que calcula la dirección
+física en memoria directamente mediante aritmética de punteros base + desplazamiento,
+sin importar si la lista tiene 10 o 10,000,000 de elementos.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada operación con su método:
+  - Crear      ---> add
+  - Leer uno   ---> buscar(id)
+  - Actualizar ---> setCantidad
+  - Eliminar   ---> removeIf
+JUSTIFICACIÓN:
+`add` inserta; `buscar(id)` localiza y retorna el objeto; `setCantidad` muta el atributo;
+y `removeIf` descarta elementos coincidentes.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los pasos de `actualizar(id, cantidad)`:
+  [1] Buscar el insumo por id
+  [2] Si la caja está vacía, devolver false
+  [3] Sacar el insumo del Optional
+  [4] Cambiar la cantidad
+  [5] Devolver true
+JUSTIFICACIÓN:
+Flujo seguro con Optional: verificar existencia antes de desenvolver el valor y mutarlo.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+inv.listar().add(…) lanza UnsupportedOperationException. ¿Por qué?
+  a) La lista está llena
+  b) listar() devuelve una copia que no se puede modificar
+  c) Falta import
+  d) El insumo es inválido
+RESPUESTA CORRECTA: b) listar() devuelve una copia que no se puede modificar
+JUSTIFICACIÓN:
+`List.copyOf` devuelve deliberadamente una colección inmutable para proteger el encapsulamiento.
+Cualquier intento de mutación directa está vetado por diseño.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica qué devuelve buscar(9) cuando no existe y por qué eso es mejor que null.
+RESPUESTA Y JUSTIFICACIÓN:
+Devuelve `Optional.empty()`. Es infinitamente superior a devolver `null` porque el tipo
+de retorno `Optional<T>` hace explícito en la firma del método que el resultado puede no estar presente.
+Esto fuerza al programador a usar métodos seguros como `.isPresent()`, `.map()` o `.orElse(...)`,
+eliminando de raíz las excepciones en tiempo de ejecución por puntero nulo (`NullPointerException`).
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Valeria tendrá 50 000 productos. ¿Seguirías con ArrayList para buscar por id? Justifica.
+RESPUESTA Y JUSTIFICACIÓN:
+NO se debería seguir usando únicamente `ArrayList` para búsquedas frecuentes por ID.
+En un `ArrayList`, buscar por ID requiere una búsqueda secuencial O(n): para 50,000 productos,
+se deben realizar hasta 50,000 comparaciones en cada consulta. Con ese volumen de datos,
+se debe migrar a un `HashMap<Integer, Insumo>` o indexar en una base de datos relacional,
+donde la localización por clave se realiza en tiempo constante O(1).
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe el método boolean existe(String nombre) para Inventario.
+RESPUESTA Y CÓDIGO:
+```java
+public boolean existe(String nombre) {
+    for (Insumo i : insumos) {
+        if (i.getNombre().equalsIgnoreCase(nombre)) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 09 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en CRUD, ArrayList, Optional, copias inmutables y removeIf.
+- Insignia obtenida: «Administrador/a del inventario».
+================================================================================

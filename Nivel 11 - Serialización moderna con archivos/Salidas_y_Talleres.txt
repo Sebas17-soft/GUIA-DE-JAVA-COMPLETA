@@ -1,0 +1,88 @@
+================================================================================
+NIVEL 11: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 11 - Serialización moderna con archivos $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: SERIALIZACION DE BODEGA CON FILTRO ===
+Bodega serializada en: bodega.ser (238 bytes)
+Insumos recuperados de bodega.ser:
+  Insumo[id=1, nombre=Café Especial Huila (kg), cantidad=50]
+  Insumo[id=2, nombre=Leche Entera (L), cantidad=80]
+  Insumo[id=3, nombre=Vasos biodegradables 12oz, cantidad=500]
+
+=== DEMOSTRACION SESION 04: PERSISTENCIA EN CSV ===
+Archivo CSV generado en bodega.csv:
+  id;nombre;cantidad
+  1;Café Especial Huila (kg);50
+  2;Leche Entera (L);80
+  3;Vasos biodegradables 12oz;500
+
+=== DEMOSTRACION SESION 06: TURNO Y FILTRO DE SEGURIDAD ===
+Turno[barista=Martín, bebidas=42] · 81 bytes
+
+=== DEMOSTRACION SESION 07: AGENDA QUE NO OLVIDA ===
+Reservas guardadas en disco.
+  Recuperada: Reserva[id=1, cliente=Familia Restrepo, personas=5, hora=19:30]
+  Recuperada: Reserva[id=2, cliente=Dra. Patricia, personas=2, hora=20:00]
+Reservas exportadas a CSV con éxito (76 bytes).
+
+=== DEMOSTRACION RECHAZO DE FILTRO (PREGUNTA 5 S08) ===
+Filtro actuó correctamente: filter status: REJECTED
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: Si el archivo bodega.ser no existe, ¿qué devuelve almacen.cargar()?
+- Respuesta: Devuelve una lista vacía `new ArrayList<>()` sin lanzar error.
+
+PREDICCIÓN 2:
+- Pregunta: ¿Por qué la lista blanca incluye java.util.ArrayList y java.lang.Object?
+- Respuesta: Porque los insumos se guardaron dentro de un `ArrayList`, por lo que el stream
+  debe deserializar tanto el contenedor como su jerarquía básica antes de leer los elementos individuales.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (SERIALIZAR TURNO)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[Cloneable, length, ObjectOutputStream, read, File, writeObject, write, Path, Serializable, size, try, readObject]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬────────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida    │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ Serializable       │ Interfaz requerida para que Turno pueda serializarse.       │
+│ 2       │ Path               │ Factoría estática Path.of("turno.ser") de java.nio.file.    │
+│ 3       │ try                │ Inicia el bloque try-with-resources que cierra el stream.   │
+│ 4       │ ObjectOutputStream │ Flujo de alto nivel que codifica objetos a bytes.           │
+│ 5       │ writeObject        │ Método para escribir el objeto serializado en el stream.    │
+│ 6       │ readObject         │ Método para recuperar el objeto reconstruido del archivo.   │
+│ 7       │ size               │ Método de Files para consultar el peso en bytes del archivo.│
+└─────────┴────────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Qué hace el try del espacio 3 con el flujo al terminar el bloque? ¿Qué pasaría sin él si ocurre un error?
+   Respuesta: El try-with-resources garantiza el cierre automático (`close()`) del stream y del fichero
+   en el sistema operativo. Sin él, ante una excepción el archivo quedaría bloqueado en el disco
+   por el proceso de Java.
+
+2. Pregunta: Si cambias el filtro a "!*", ¿qué excepción esperas al leer?
+   Respuesta: Se produce `java.io.InvalidClassException: filter status: REJECTED`, ya que el comodín `!*`
+   rechaza cualquier clase que intente cargarse.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (AGENDA QUE NO OLVIDA)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `Reserva`: record serializable con validación compacta de comensales (1 a 8).
+2. `ArchivoReservas`: persistencia dual en `reservas.ser` (binario con filtro) y `reservas.csv` (texto exportable).
+3. Prueba de carga y verificación de persistencia confirmada.
+================================================================================

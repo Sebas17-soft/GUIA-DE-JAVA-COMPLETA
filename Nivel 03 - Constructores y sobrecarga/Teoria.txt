@@ -1,0 +1,199 @@
+================================================================================
+NIVEL 03: CONSTRUCTORES Y SOBRECARGA · BEBIDAS BIEN NACIDAS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo nace cada bebida con todos sus datos válidos desde el primer instante?
+- Contexto de Café Sintaxis:
+  En el nivel anterior, para configurar una bebida debíamos instanciarla y luego llamar a múltiples
+  setters. Si alguien olvidaba asignar el nombre o el precio, el objeto quedaba incompleto
+  y podía provocar errores. Valeria pide que ninguna bebida ni reserva exista en memoria
+  sin sus datos esenciales completos y validados desde el nacimiento.
+- Objetivos de aprendizaje:
+  1. Comprender la anatomía de un constructor y por qué no tiene tipo de retorno.
+  2. Implementar constructores sobrecargados y delegación con `this(...)`.
+  3. Aplicar el modificador `final` a los campos para garantizar inmutabilidad.
+  4. Utilizar las novedades de Java 25 (JEP 513: Flexible Constructor Bodies / Statements before super/this)
+     para ejecutar código de prólogo (validaciones) antes de invocar `this(...)`.
+  5. Dominar la sobrecarga de métodos distinguiendo firmas válidas (número y tipo de parámetros).
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS (JAVA SE 25)
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- CONSTRUCTOR (JLS Java SE 25, §8.8):
+  «Un constructor se utiliza en la creación de un objeto que es una instancia de una clase.»
+  No es un método; lleva exactamente el mismo nombre de la clase y no especifica tipo de retorno
+  (ni siquiera void).
+
+- SOBRECARGA (JLS Java SE 25, §8.4.9):
+  «Si dos métodos de una clase tienen el mismo nombre pero firmas que no son idénticas por tipos
+  de parámetros, se dice que el nombre del método está sobrecargado.»
+
+- CONSTRUCTOR POR DEFECTO:
+  Si una clase no declara ningún constructor explícito, el compilador Java proporciona
+  automáticamente un constructor sin argumentos (no-arg constructor). Sin embargo, tan pronto
+  como se declara un constructor con parámetros, el constructor por defecto desaparece.
+
+Analogía con la cafetería:
+El constructor es el proceso de preparación del barista: no te entregan un vaso vacío para
+que luego tú le pongas el café y el agua; te entregan la bebida ya lista, con su receta
+y medidas exactas desde que sale de la barra.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: DELEGACIÓN Y NOVEDADES DE JAVA 25
+--------------------------------------------------------------------------------
+La Regla del Constructor Único Responsable (Single Source of Truth):
+Cuando una clase tiene varios constructores (por ejemplo, uno completo con 4 parámetros
+y uno corto con 2 parámetros), el constructor corto debe delegar en el completo mediante
+`this(...)`. Así, las reglas de validación y las asignaciones viven en un único lugar.
+
+Novedad Revolucionaria en Java 25 (JEP 513):
+En versiones anteriores de Java (hasta Java 21), la instrucción `this(...)` o `super(...)`
+debía ser estrictamente la PRIMERA línea del constructor.
+Desde Java 22 y consolidado en Java 25 (JEP 513), se permiten declaraciones previas al
+constructor (código de prólogo), permitiendo validar parámetros o calcular transformaciones
+antes de llamar a `this(...)`.
+Restricción: en el prólogo NO se puede acceder a `this` ni a variables de instancia,
+porque el objeto aún no ha completado su inicialización básica.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Bebida.java:
+- Cuatro campos `private final`: `nombre`, `tamano`, `precio`, `leche`.
+  Al ser `final`, el compilador obliga a que sean asignados en el constructor y jamás muten.
+- `Bebida(nombre, tamano, precio, leche)`: Constructor maestro con validación `precio <= 0`.
+- `Bebida(nombre, precio)`: Prólogo con `if (nombre.isBlank()) throw ...`, y delega
+  en `this(nombre, "mediano", precio, false)`.
+- Sobrecarga de `precioCon`:
+  * `precioCon(int extras)`: suma `$1500` por extra.
+  * `precioCon(String cupon)`: si es "CAFE10", aplica 10% de descuento.
+
+Reserva.java (Solución de Ana):
+- Constructor maestro: `Reserva(cliente, personas, hora)` valida que las mesas sean para
+  1 a 8 personas.
+- Constructor sobrecargado: `Reserva(cliente, personas)` delega con `this(cliente, personas, "19:00")`.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: INMUTABILIDAD EN SISTEMAS CONCURRENTES
+--------------------------------------------------------------------------------
+- Los objetos inmutables cuyos campos son `final` son intrínsecamente seguros para hilos (thread-safe).
+- En sistemas comerciales como una cafetería donde varias comandas y terminales de pago
+  consultan el catálogo a la vez, evitar cambios inesperados en los objetos elimina
+  condiciones de carrera y errores intermitentes.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué distingue a un constructor de un método?
+  a) Empieza con get
+  b) Usa el nombre de la clase y no tiene tipo de retorno
+  c) Siempre es static
+  d) Siempre recibe un String
+RESPUESTA CORRECTA: b) Usa el nombre de la clase y no tiene tipo de retorno
+JUSTIFICACIÓN:
+Un constructor debe coincidir obligatoriamente con el identificador de la clase y carece
+de tipo de retorno, a diferencia de los métodos ordinarios que especifican un tipo o `void`.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Dos métodos con el mismo nombre y los mismos parámetros, pero distinto tipo de retorno, son una sobrecarga válida."
+  [V]  [F]
+RESPUESTA CORRECTA: FALSO (F)
+JUSTIFICACIÓN:
+En Java, la firma de un método está compuesta únicamente por su nombre y la lista de tipos
+de sus parámetros. El tipo de retorno NO forma parte de la firma; cambiar solo el tipo de retorno
+provoca un error de compilación por método duplicado.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada pieza con su función:
+  - this.precio   ---> El atributo del objeto
+  - this(…)       ---> Llama a otro constructor
+  - final         ---> Se asigna una sola vez
+  - Prólogo       ---> Validar antes de delegar
+JUSTIFICACIÓN:
+`this.precio` apunta al campo de instancia; `this(...)` delega la construcción en otro
+constructor de la misma clase; `final` marca una variable como inmutable; el prólogo en Java 25
+permite verificar argumentos antes de transferir el control a `this(...)`.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena lo que pasa con `new Bebida("Tinto", 3500)`:
+  [1] Java elige el constructor de 2 parámetros
+  [2] El prólogo valida el nombre
+  [3] this(…) llama al constructor completo
+  [4] Se valida el precio
+  [5] Se asignan los 4 campos
+JUSTIFICACIÓN:
+La JVM resuelve primero la sobrecarga por los argumentos entregados; se ejecuta el prólogo
+del constructor corto; se delega en el constructor maestro; se valida el precio y finalmente
+se asignan en memoria los cuatro campos finales.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+Escribiste un constructor con parámetros y ahora `new Bebida()` no compila. ¿Por qué?
+  a) Falta import
+  b) El constructor por defecto solo existe si no declaras ninguno
+  c) Bebida es final
+  d) Falta un return
+RESPUESTA CORRECTA: b) El constructor por defecto solo existe si no declaras ninguno
+JUSTIFICACIÓN:
+Java genera un constructor sin argumentos por defecto de forma automática únicamente
+si la clase carece de constructores explícitos. Al agregar un constructor con parámetros,
+el compilador retira el constructor por defecto.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué conviene que el constructor corto delegue con this(…) en vez de copiar las asignaciones.
+RESPUESTA Y JUSTIFICACIÓN:
+Aplica el principio de "Única Fuente de Verdad" (DRY - Don't Repeat Yourself). Si en el futuro
+cambia una validación (como el rango permitido de precios o el formato del nombre), solo se
+modifica en un solo lugar (el constructor maestro). Si se duplicara código, cualquier cambio
+requeriría editar múltiples constructores, con alto riesgo de olvidar alguno e introducir inconsistencias.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Julián prefiere setters a constructores «porque es más flexible». ¿Qué riesgo vimos en este nivel? Argumenta.
+RESPUESTA Y JUSTIFICACIÓN:
+El riesgo de los setters es permitir la existencia de "objetos zombi" o a medio construir.
+Un objeto creado con `new Bebida()` sin parámetros queda inicialmente con datos vacíos o nulos.
+Si un hilo o método intenta usar el objeto antes de que se hayan llamado todos sus setters,
+el sistema fallará con `NullPointerException` o datos inconsistentes. Los constructores
+garantizan que el objeto nace completo, válido e inmutable desde el milisegundo cero.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe dos constructores para Domicilio(direccion, valor) y Domicilio(direccion) con valor 4000 por defecto.
+RESPUESTA Y CÓDIGO:
+```java
+public class Domicilio {
+    private final String direccion;
+    private final int valor;
+
+    public Domicilio(String direccion, int valor) {
+        if (valor < 0) throw new IllegalArgumentException("Valor inválido");
+        this.direccion = direccion;
+        this.valor = valor;
+    }
+
+    public Domicilio(String direccion) {
+        this(direccion, 4000); // delega con valor por defecto
+    }
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 03 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE (constructores, sobrecarga, prólogo Java 25, campos final).
+- Mapa conceptual:
+  Constructores en Java 25
+    ├── Prólogo (validaciones antes de super/this)
+    ├── Delegación this(...) a constructor canónico
+    ├── Asignación de campos inmutables (final)
+    └── Sobrecarga de métodos por lista de parámetros distintos
+- Insignia obtenida: «Arquitecto/a del nacimiento».
+- Explicación en 60 segundos:
+  "Un constructor garantiza que todo objeto nace íntegro e inmutable desde su primer milisegundo de vida.
+  Gracias a la sobrecarga y a la delegación con this(...), podemos ofrecer atajos cómodos para el negocio
+  sin repetir validaciones, aprovechando el prólogo de Java 25 para validar argumentos antes de crear el objeto."
+================================================================================

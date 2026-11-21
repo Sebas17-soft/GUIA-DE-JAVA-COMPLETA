@@ -1,0 +1,199 @@
+================================================================================
+NIVEL 08: GENÉRICOS · UN REPOSITORIO PARA TODO
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo escribo un repositorio para todo sin duplicar código ni arriesgar tipos?
+- Contexto de Café Sintaxis:
+  El sistema necesita almacenar productos, clientes, pedidos e insumos. En el pasado,
+  los programadores debían crear `RepositorioProducto`, `RepositorioCliente`, `RepositorioPedido`,
+  o usar `Object` con peligrosos casteos manuales (`(Producto) obj`) que fallaban en tiempo
+  de ejecución con `ClassCastException`. Valeria necesita una solución elegante y reutilizable
+  que garantice seguridad de tipos en tiempo de compilación.
+- Objetivos de aprendizaje:
+  1. Comprender la motivación de los genéricos: seguridad de tipos (type safety) y eliminación de casts.
+  2. Declarar clases genéricas con variables de tipo `<T>`.
+  3. Acotar tipos genéricos (`<T extends Identificable>`) para exigir capacidades mínimas.
+  4. Escribir métodos genéricos independientes (`<T> T metodo(List<T> l)`).
+  5. Utilizar comodines (`?`, `? extends T`) para lectura polimórfica (PECS).
+  6. Comprender el borrado de tipos (type erasure) de la máquina virtual de Java.
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES DE LA JLS (JAVA SE 25)
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- CLASE GENÉRICA (JLS Java SE 25, §8.1.2):
+  «Una clase es genérica si declara uno o más parámetros de tipo. Estos parámetros de tipo
+  se conocen como los parámetros de tipo de la clase.»
+
+- PARÁMETRO DE TIPO ACOTADO (Bounded Type Parameter):
+  «Se puede restringir los tipos que pueden usarse como argumentos de tipo en un tipo parametrizado
+  mediante una cláusula extends (ej. `<T extends Identificable>`).»
+  Permite invocar dentro de la clase genérica los métodos declarados en la cota superior
+  (como `item.id()`).
+
+- COMODÍN (Wildcard `?` · JLS Java SE 25, §4.5.1):
+  «Un comodín representa un tipo desconocido.»
+  Un comodín con cota superior `List<? extends Producto>` permite recibir una lista de
+  cualquier subtipo de `Producto` (como `List<Bebida>` o `List<Postre>`), garantizando
+  operaciones de lectura seguras.
+
+Analogía con la cafetería:
+Una bandeja portavasos de cartón es un contenedor genérico: puede llevar 4 bebidas
+o 4 postres, pero no mezcla herramientas con comida. Si declaras `Bandeja<Bebida>`,
+el barista tiene la certeza absoluta de que todo lo que saque de allí es una bebida bebible,
+sin tener que probarla ni adivinar qué es.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: SEGURIDAD EN COMPILACIÓN Y COMODINES
+--------------------------------------------------------------------------------
+Tiempo de Compilación vs Tiempo de Ejecución:
+Sin genéricos (usando `Object`):
+- Los errores de tipo pasan desapercibidos por el compilador y estallan en producción
+  ante el cliente con `ClassCastException`.
+Con genéricos:
+- El compilador impide insertar un `Cliente` en un `Repositorio<Producto>`, detectando
+  la incompatibilidad inmediatamente.
+
+Principio PECS (Producer Extends, Consumer Super):
+- Producer Extends: Si solo vas a LEER elementos de la colección para procesarlos, usa `? extends T`.
+- Consumer Super: Si solo vas a ESCRIBIR o agregar elementos en la colección, usa `? super T`.
+
+Borrado de tipos (Type Erasure):
+El compilador comprueba rigurosamente los tipos durante la compilación y luego borra la información
+genérica en el bytecode, reemplazando `T` por su cota superior (`Identificable` u `Object`) e
+insertando los casts necesarios. Esto asegura compatibilidad total con librerías legadas.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Repositorio.java:
+```java
+public class Repositorio<T extends Identificable> {
+    private final List<T> items = new ArrayList<>();
+    public void guardar(T item) { items.add(item); }
+    public T buscar(int id) {
+        for (T item : items) {
+            if (item.id() == id) return item; // Válido gracias a T extends Identificable
+        }
+        return null;
+    }
+}
+```
+
+Método Genérico maximo (Solución de Ana):
+```java
+<T extends Comparable<T>> T maximo(List<T> lista) {
+    T max = lista.getFirst();
+    for (T item : lista) {
+        if (item.compareTo(max) > 0) max = item;
+    }
+    return max;
+}
+```
+Reutilizable con enteros, decimales, textos o cualquier clase que implemente `Comparable`.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: LA EVOLUCIÓN HISTÓRICA DE JAVA
+--------------------------------------------------------------------------------
+- Introducidos en Java 5 (2004) por Martin Odersky, Philip Wadler y Gilad Bracha.
+- En Java 25, los genéricos son el pilar de toda la Java Collections Framework (`List<E>`,
+  `Map<K, V>`, `Optional<T>`, `Stream<T>`), permitiendo escribir algoritmos universales.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué símbolo se llama comodín en los genéricos?
+  a) T
+  b) <>
+  c) ?
+  d) *
+RESPUESTA CORRECTA: c) ?
+JUSTIFICACIÓN:
+El signo de interrogación `?` es la sintaxis oficial reservada en Java para representar
+un tipo comodín (wildcard).
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Con Repositorio<Producto>, el compilador impide guardar un Cliente."
+  [V]  [F]
+RESPUESTA CORRECTA: VERDADERO (V)
+JUSTIFICACIÓN:
+Al parametrizar el repositorio con `<Producto>`, el método `guardar(T)` exige estrictamente
+un objeto de tipo `Producto` (o subclase suya). Pasar un `Cliente` provoca error de compilación inmediato.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada código con su nombre:
+  - <T>                     ---> Parámetro de tipo
+  - new ArrayList<>()       ---> Diamante
+  - T extends Identificable ---> Parámetro acotado
+  - ? extends Producto      ---> Comodín acotado
+JUSTIFICACIÓN:
+`<T>` define una variable genérica; `<>` infiere tipos en el constructor; `T extends ...`
+acota el tipo formal; y `? extends ...` acota un comodín de uso.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los pasos para volver genérica una clase repetida:
+  [1] Detectar dos clases que solo cambian de tipo
+  [2] Agregar <T> a una de ellas
+  [3] Cambiar el tipo concreto por T
+  [4] Acotar T si se llaman métodos suyos
+  [5] Borrar la copia y probar con ambos tipos
+JUSTIFICACIÓN:
+Es el flujo metódico de refactorización hacia genéricos recomendado por Fowler y Bloch.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+new Repositorio<String>() no compila. ¿Por qué?
+  a) String es final
+  b) String no implementa Identificable
+  c) Falta el diamante
+  d) Los genéricos no aceptan textos
+RESPUESTA CORRECTA: b) String no implementa Identificable
+JUSTIFICACIÓN:
+La definición exige `T extends Identificable`. Dado que `String` no implementa la interfaz
+`Identificable`, el compilador rechaza el tipo por violar la cota superior declarada.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué el programa sin genéricos falla al ejecutarse y el genérico falla al compilar. ¿Qué cambia para el negocio?
+RESPUESTA Y JUSTIFICACIÓN:
+Sin genéricos, las colecciones manejan `Object` y el error se manifiesta recién cuando
+el usuario ejecuta la acción y la JVM arroja `ClassCastException`, deteniendo la caja o
+corrompiendo la base de datos. Con genéricos, el error salta en el IDE del programador
+meses antes de que el código toque producción. Para el negocio significa estabilidad,
+cero caídas por casteo y ahorro sustancial en costos de soporte.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Julián quiere usar List<Object> para todo «y así no pelear con tipos». ¿Qué le respondes?
+RESPUESTA Y JUSTIFICACIÓN:
+Se le responde que volver a `List<Object>` anula la mayor ventaja del sistema de tipos
+estático de Java. Con `List<Object>` cualquiera puede insertar por accidente una factura
+en la lista de postres; al leer los elementos, habrá que adivinar el tipo y hacer casts
+frágiles con `if (x instanceof ...)`, creando un código espagueti vulnerable a fallos silenciosos.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe un método genérico <T> List<T> primeros(List<T> l, int n) y una llamada con nombres de bebidas.
+RESPUESTA Y CÓDIGO:
+```java
+public static <T> List<T> primeros(List<T> l, int n) {
+    List<T> resultado = new ArrayList<>();
+    for (int i = 0; i < Math.min(n, l.size()); i++) {
+        resultado.add(l.get(i));
+    }
+    return resultado;
+}
+```
+Llamada con bebidas:
+```java
+List<String> bebidas = List.of("Latte", "Espresso", "Capuchino", "Moca");
+List<String> top2 = primeros(bebidas, 2);
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 08 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en clases genéricas, métodos genéricos, cotas superiores y comodines.
+- Insignia obtenida: «Moldeador/a universal».
+================================================================================

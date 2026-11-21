@@ -1,0 +1,178 @@
+================================================================================
+NIVEL 07: PRINCIPIOS SOLID · LA CAJA REGISTRADORA LIMPIA
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo cambio la caja y los reportes sin romper el sistema?
+- Contexto de Café Sintaxis:
+  La clase Caja original acumulaba demasiadas tareas: cobraba, calculaba descuentos con cadenas
+  `if/else`, daba formato al ticket de texto y enviaba mensajes por SMS reales directamente
+  con `new SmsService()`. Cuando se deseaba probar la caja en desarrollo, se enviaban SMS reales
+  costosos o fallaba la red. Valeria pide refactorizar la caja aplicando los principios SOLID
+  para que cada clase tenga una única responsabilidad y el sistema sea testeable y extensible.
+- Objetivos de aprendizaje:
+  1. Comprender y aplicar los cinco principios SOLID propuestos por Robert C. Martin (Uncle Bob).
+  2. SRP: Separar la lógica de cálculo (Totales) del formato (Ticket / Reporte).
+  3. OCP: Diseñar sistemas abiertos a la extensión pero cerrados a la modificación mediante contratos (`Descuento`, `Formato`).
+  4. LSP: Garantizar que cualquier implementación derivada respete el contrato de la abstracción (ej. jamás devolver cobros negativos).
+  5. ISP: Mantener interfaces específicas y pequeñas (`Impresora`, `Notificador`, `Destino`).
+  6. DIP: Inyectar dependencias por constructor evitando el acoplamiento directo a clases concretas (`new`).
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: LOS CINCO PRINCIPIOS SOLID
+--------------------------------------------------------------------------------
+Definiciones oficiales:
+
+- S · Single Responsibility Principle (Principio de Responsabilidad Única):
+  «Una clase debe tener una, y solo una, razón para cambiar.»
+  Si una clase calcula finanzas, formatea texto y envía mensajes por red, tiene tres razones
+  para cambiar. Debe fragmentarse en piezas autónomas.
+
+- O · Open/Closed Principle (Principio Abierto/Cerrado):
+  «Las entidades de software deben estar abiertas para su extensión, pero cerradas para su modificación.»
+  Se debe poder añadir un nuevo tipo de descuento o formato de archivo creando una nueva clase,
+  sin editar ni una coma de las clases existentes.
+
+- L · Liskov Substitution Principle (Principio de Sustitución de Liskov):
+  «Los subtipos deben ser sustituibles por sus tipos base sin alterar la corrección del programa.»
+  Si la interfaz `Descuento` promete que el cobro nunca es negativo, ninguna implementación
+  puede devolver números negativos ni lanzar excepciones inesperadas.
+
+- I · Interface Segregation Principle (Principio de Segregación de Interfaces):
+  «Ningún cliente debe ser forzado a depender de métodos que no usa.»
+  Es preferible tener muchas interfaces pequeñas y enfocadas (`Impresora`, `Notificador`)
+  que una única interfaz monstruosa ("God Interface") con decenas de métodos.
+
+- D · Dependency Inversion Principle (Principio de Inversión de Dependencias):
+  «Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender
+  de abstracciones. Las abstracciones no deben depender de los detalles.»
+
+Analogía con la cafetería:
+En una barra profesional, la cafetera espresso solo exige un enchufe eléctrico y una toma
+de agua estándar (contratos/interfaces). La máquina no sabe si la electricidad viene de
+la red pública o de un generador solar; se conecta mediante su clavija (inyección de dependencias).
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: ARQUITECTURA LIMPIA Y TESTABILIDAD
+--------------------------------------------------------------------------------
+La Inyección de Dependencias por Constructor:
+Al pasar el `Notificador` en el constructor de `Caja`:
+```java
+public Caja(Notificador notificador) {
+    this.notificador = notificador;
+}
+```
+Se logra el desacoplamiento total. En producción, `Main` le pasa `new SmsSimulado()`.
+En pruebas unitarias o desarrollo, le pasa `new NotificadorMemoria()`, permitiendo auditar
+los mensajes generados en memoria sin gastar dinero ni requerir conexión a internet.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO
+--------------------------------------------------------------------------------
+Descuento y Liskov:
+- `Porcentaje`: aplica un porcentaje de descuento matemático.
+- `Fidelidad`: descuenta puntos acumulados, pero con `Math.min(total, puntos * 100)`
+  para impedir que el total cobrado sea inferior a cero, preservando la regla de negocio.
+
+Refactorización de Cocina (Sesión 06):
+- `Cocina` no usa `System.out.println` directamente; delega en `Impresora`.
+- Se le puede conectar `ImpresoraConsola`, `ImpresoraBluetooth` o `ImpresoraTermica`.
+
+ReporteDiario (Sesión 07):
+- Separa cálculo (`Totales`), formato (`FormatoTexto`, `FormatoCsv`) y envío (`DestinoConsola`).
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: SOLID EN SISTEMAS ENTERPRISE
+--------------------------------------------------------------------------------
+- Aplicar SOLID en proyectos empresariales permite que equipos de decenas de programadores
+  trabajen en paralelo sobre diferentes módulos sin pisarse el código ni generar conflictos de merge.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué principio dice «abierto a la extensión, cerrado a la modificación»?
+  a) S
+  b) O
+  c) L
+  d) D
+RESPUESTA CORRECTA: b) O (Open/Closed Principle)
+JUSTIFICACIÓN:
+Es la formulación clásica del principio formulado por Bertrand Meyer y adaptado por Robert C. Martin.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Inyectar una dependencia por el constructor ayuda a probar una clase sin usar recursos reales."
+  [V]  [F]
+RESPUESTA CORRECTA: VERDADERO (V)
+JUSTIFICACIÓN:
+Permite suministrar "dobles de prueba" (mocks, stubs o almacenes en memoria) en lugar de conexiones
+a bases de datos, pasarelas de pago o servidores SMS externos.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada principio con su pregunta de diseño:
+  - S ---> ¿Cuántas razones tiene para cambiar?
+  - L ---> ¿La hija cumple lo que promete el padre?
+  - I ---> ¿Obligo a escribir métodos que no se usan?
+  - D ---> ¿Dependo de interfaces o de detalles?
+JUSTIFICACIÓN:
+Cada pregunta condensa la esencia de su respectivo principio SOLID.
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los pasos de una refactorización segura:
+  [1] Guardar la salida actual
+  [2] Separar una responsabilidad
+  [3] Ejecutar y comparar la salida
+  [4] Recién entonces mejorar comportamiento
+  [5] Repetir con la siguiente
+JUSTIFICACIÓN:
+La regla dorada de Martin Fowler para refactorizar: tener pruebas o salidas de referencia
+que confirmen que el comportamiento observable externo no se altera mientras se reestructura internamente.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+Fidelidad devolvía −500. ¿Qué principio violaba?
+  a) Responsabilidad única
+  b) Sustitución de Liskov: rompía el contrato «nunca negativo»
+  c) Segregación de interfaces
+  d) Ninguno
+RESPUESTA CORRECTA: b) Sustitución de Liskov: rompía el contrato «nunca negativo»
+JUSTIFICACIÓN:
+El contrato de `Descuento` establece que un cobro jamás puede ser negativo. Devolver -500
+rompe las expectativas de la clase `Caja`, que terminaría devolviendo dinero de forma anómala.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+Explica por qué Main es el único lugar que conoce SmsSimulado y qué ventaja tiene eso.
+RESPUESTA Y JUSTIFICACIÓN:
+`Main` actúa como el "Compositor" o "Raíz de Composición" (Composition Root) del sistema.
+La clase `Caja` solo conoce la interfaz `Notificador`. La ventaja radical es que podemos
+cambiar `SmsSimulado` por `NotificadorEmail` o `NotificadorWhatsApp` editando ÚNICAMENTE
+una sola línea en `Main`, sin tocar jamás el código compilado ni probado de la `Caja`.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Para una calculadora de propinas de 20 líneas, ¿aplicarías los cinco principios? Justifica tu decisión.
+RESPUESTA Y JUSTIFICACIÓN:
+NO. Aplicar los 5 principios a un script de 20 líneas introduce sobreingeniería innecesaria
+(YAGNI - You Aren't Gonna Need It). SOLID está diseñado para gestionar la complejidad y la
+evolución de sistemas que crecen; aplicarlo indiscriminadamente a utilidades triviales
+aumenta el número de archivos y la dificultad de lectura sin aportar beneficios reales.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe un Descuento nuevo, HoraFeliz, que reste 30 % y nunca devuelva negativo.
+RESPUESTA Y CÓDIGO:
+```java
+public class HoraFeliz implements Descuento {
+    @Override
+    public int aplicar(int total) {
+        if (total <= 0) return 0;
+        return total * 70 / 100; // 30% menos
+    }
+}
+```
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 07 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo: VERDE en los 5 principios SOLID y refactorización desacoplada.
+- Insignia obtenida: «Arquitecto/a de código limpio».
+================================================================================

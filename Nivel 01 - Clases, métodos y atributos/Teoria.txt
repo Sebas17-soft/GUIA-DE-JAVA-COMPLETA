@@ -1,0 +1,246 @@
+================================================================================
+NIVEL 01: CLASES, MÉTODOS Y ATRIBUTOS · EL MENÚ COBRA VIDA
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. PORTADA Y MISIÓN DEL NIVEL
+--------------------------------------------------------------------------------
+- Pregunta guía: ¿Cómo convierte Java la ficha de un producto en objetos que
+  saben su precio y se venden solos?
+- Contexto de Café Sintaxis:
+  Café Sintaxis es una cafetería de barrio. Valeria, la dueña, lleva el menú
+  en un cuaderno y Martín, en caja, cobra con calculadora. Ana y Julián, que
+  programan en Java 25, te invitan a construir el sistema de la cafetería.
+  Tu primer encargo: que cada producto del menú sea un objeto que sabe su
+  nombre, su precio y su stock, y que sabe venderse.
+- Objetivos de aprendizaje:
+  1. Definir clase, objeto, atributo y método según la Java Language Specification (JLS).
+  2. Escribir una clase con atributos y métodos que devuelven valores.
+  3. Crear objetos con new y usar el operador punto (.) para leer, modificar y llamar métodos.
+  4. Ejecutar programas en Java 25 con el lanzador `java Main.java`.
+  5. Leer e interpretar errores del compilador y corregirlos.
+
+--------------------------------------------------------------------------------
+2. SESIÓN 01 · DESCUBRE: DEFINICIONES OFICIALES Y VOCABULARIO
+--------------------------------------------------------------------------------
+Definiciones oficiales de la Java Language Specification (JLS · Java SE 25):
+
+- CLASE (JLS Java SE 25, Capítulo 8):
+  «Una declaración de clase define una clase nueva y describe cómo está implementada.»
+  (Original: "A class declaration defines a new class and describes how it is implemented.")
+
+- ATRIBUTO / CAMPO (JLS Java SE 25, §8.3):
+  «Las variables de una clase se introducen mediante declaraciones de campo.»
+  (Original: "The variables of a class are introduced by field declarations.")
+
+- MÉTODO (JLS Java SE 25, Capítulo 8):
+  «Las declaraciones de métodos describen código que puede invocarse mediante
+  expresiones de invocación de métodos.»
+  (Original: "Method declarations describe code that may be invoked by method invocation expressions.")
+
+Síntesis de la guía:
+Una clase es el plano o molde de diseño; un objeto es la instancia concreta que se
+construye en memoria siguiendo ese plano. Los atributos representan el estado (lo que
+el objeto sabe), y los métodos representan el comportamiento (lo que el objeto hace).
+
+Analogía con la cafetería:
+La ficha o receta del producto en el menú impreso es la CLASE (define qué datos lleva
+un café: nombre, precio, stock). Cada taza real servida en la mesa de un cliente es
+un OBJETO (tiene su propio café, su temperatura y su costo).
+
+Vocabulario clave:
+- class: palabra reservada que define un tipo y su estructura.
+- new: operador de asignación dinámica de memoria que instancia y crea un objeto.
+- Operador punto (.): operador de acceso a miembros (atributos y métodos) de una instancia.
+- Estado: conjunto de valores presentes en los atributos de un objeto en un instante de tiempo.
+- Comportamiento: conjunto de operaciones o métodos que un objeto puede ejecutar.
+- void: tipo de retorno que indica que un método ejecuta una acción pero no devuelve ningún valor.
+- return: transfiere el control y opcionalmente entrega un valor al llamador.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 02 · COMPRENDE: CONCEPTOS A FONDO Y MEMORIA
+--------------------------------------------------------------------------------
+Memoria y Objetos en Java:
+Al instanciar objetos con `new Producto()`, la máquina virtual de Java (JVM) reserva
+espacio en el montículo (Heap memory). Si creamos `latte` y `brownie`, cada uno posee
+su propia copia independiente de los atributos `nombre`, `precio` y `stock`:
+
+  [Objeto latte : Producto]        [Objeto brownie : Producto]
+  nombre: "Latte"                  nombre: "Brownie"
+  precio: 9500                     precio: 7000
+  stock:  1                        stock:  0
+
+Valores por defecto en campos no inicializados:
+En Java, los campos de instancia reciben valores por defecto automáticamente si no se inicializan:
+- Números enteros (byte, short, int, long): 0
+- Números flotantes (float, double): 0.0
+- Booleans: false
+- Referencias a objetos (String, arrays, otras clases): null
+
+Novedades de Java 25 usadas en este nivel:
+1. Lanzador de código fuente multifichero (JEP 458): Al ejecutar `java Main.java`, Java compila
+   y enlaza automáticamente `Producto.java`, `Cliente.java`, `Mesa.java`, `Barista.java` en memoria
+   sin necesidad de compilar manualmente con javac ni empaquetar en JAR.
+2. Clases declaradas implícitamente y métodos main de instancia (JEP 477):
+   Se simplifica la entrada al programa: ya no es necesario escribir `public class Main { public static void main(String[] args) }`.
+   Basta con escribir `void main() { ... }`.
+3. Módulo automático de entrada/salida: `IO.println(...)` e `IO.readln(...)` disponibles de inmediato
+   sin necesidad de importar `java.lang.System` ni instanciar `Scanner`.
+
+Errores comunes de compilación y diagnóstico:
+- "cannot find symbol ... variable precioo": Ocurre cuando se escribe mal el identificador
+  de un atributo. Java distingue estrictamente mayúsculas y minúsculas y requiere coincidencia exacta.
+- "cannot find symbol ... method vender(int)": La llamada no coincide con ningún método por nombre
+  o por lista de tipos de parámetros.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 03 Y 04 · ANÁLISIS DE CÓDIGO Y DECISIONES DE DISEÑO
+--------------------------------------------------------------------------------
+Decisiones en Producto.java:
+- `vender(int cantidad)` valida si hay stock suficiente antes de descontar. Si no alcanza,
+  avisa por consola y devuelve 0; si alcanza, actualiza `stock = stock - cantidad` y devuelve
+  el total a cobrar (`cantidad * precio`).
+
+Decisiones en Cliente.java (Solución de Ana):
+- `sumarPuntos(int compra)`: La regla de la cafetería otorga 1 punto por cada $1000 de compra.
+  Se utiliza la división entera `compra / 1000`. Por ejemplo, $12,500 / 1000 resulta en 12 puntos
+  (la parte decimal se descarta naturalmente).
+- `puedeCanjear()`: Devuelve `boolean` (`puntos >= 50`).
+- `canjear()`: Resta 50 puntos solo si `puedeCanjear()` es verdadero.
+
+--------------------------------------------------------------------------------
+5. SESIÓN 05 · CONECTA: JAVA EN EL MUNDO REAL
+--------------------------------------------------------------------------------
+- Encuesta Stack Overflow 2025: 29.4% de 31,771 desarrolladores utilizan Java; 29.6% entre profesionales.
+- Índice TIOBE (Septiembre 2026): Java se mantiene en el 4.º lugar mundial con 7.54% de cuota.
+- Soporte a Largo Plazo (LTS): Java 25 cuenta con 8 años de soporte extendido empresarial, garantizando
+  estabilidad, seguridad y optimizaciones de rendimiento a gran escala.
+
+--------------------------------------------------------------------------------
+6. SESIÓN 08 · COMPRUEBA: EVALUACIÓN COMPLETA, RESPUESTAS Y JUSTIFICACIONES
+--------------------------------------------------------------------------------
+PREGUNTA 1 (Opción múltiple · DOK 1 · 3 XP):
+¿Qué palabra crea un objeto nuevo a partir de una clase?
+  a) class
+  b) new
+  c) void
+  d) return
+RESPUESTA CORRECTA: b) new
+JUSTIFICACIÓN:
+`new` es el operador de Java encargado de reservar memoria en el Heap e instanciar
+la clase llamando a su constructor. `class` define la estructura; `void` declara que
+un método no retorna valor; `return` finaliza un método y entrega un valor.
+
+PREGUNTA 2 (Verdadero o Falso · DOK 1 · 3 XP):
+"Dos objetos creados con la misma clase comparten siempre los mismos valores en sus atributos."
+  [V]  [F]
+RESPUESTA CORRECTA: FALSO (F)
+JUSTIFICACIÓN:
+Cada objeto instanciado con `new` cuenta con su propia memoria y su propio estado.
+Aunque comparten la misma estructura de atributos definida por la clase, los valores
+asignados a cada instancia (por ejemplo, el precio de un Latte vs un Brownie) son
+completamente independientes.
+
+PREGUNTA 3 (Relaciona · DOK 2 · 3 XP):
+Relaciona cada parte con su ejemplo en Producto:
+  - Atributo   ---> int stock;
+  - Método     ---> boolean hayStock()
+  - Objeto     ---> latte
+  - Parámetro  ---> int cantidad
+JUSTIFICACIÓN:
+`int stock;` es una variable declarada a nivel de clase (campo/atributo).
+`boolean hayStock()` es una función asociada a la clase (método).
+`latte` es una variable de referencia que apunta a una instancia específica (objeto).
+`int cantidad` es una variable declarada en la firma del método que recibe el valor enviado (parámetro).
+
+PREGUNTA 4 (Ordena · DOK 2 · 3 XP):
+Ordena los pasos para vender 2 lattes e imprimir el cobro:
+  [1] Escribir la clase Producto
+  [2] Crear el objeto con new
+  [3] Asignar nombre, precio y stock
+  [4] Llamar a latte.vender(2)
+  [5] Imprimir el resultado con IO.println
+JUSTIFICACIÓN:
+Primero debe existir el código de la plantilla (clase); luego se debe construir la
+instancia en memoria (`new`); luego se configuran sus datos de partida; luego se invoca
+el comportamiento (`vender`); y finalmente se presenta el resultado en pantalla.
+
+PREGUNTA 5 (Opción múltiple · DOK 2 · 3 XP):
+El compilador dice: "cannot find symbol … variable precioo". ¿Qué pasó?
+  a) Falta new
+  b) El atributo no existe con ese nombre
+  c) El método debe ser void
+  d) Falta IO
+RESPUESTA CORRECTA: b) El atributo no existe con ese nombre
+JUSTIFICACIÓN:
+El compilador indica que no existe el símbolo `precioo` en la clase porque se escribió con
+dos 'o' finales por error tipográfico, cuando el atributo real fue declarado como `precio`.
+
+PREGUNTA 6 (Respuesta abierta · Analizar · DOK 3 · 5 XP):
+¿Por qué vender devuelve int y no void? ¿Qué perdería el programa de caja si fuera void?
+RESPUESTA Y JUSTIFICACIÓN:
+`vender` devuelve `int` porque representa una transacción comercial en la que la caja
+necesita saber de inmediato el valor exacto en dinero que debe cobrarse al cliente
+(`cantidad * precio`). Si fuera `void`, el método simplemente cambiaría el stock interno
+pero no informaría a la caja cuánto cobrar, obligando a la caja a realizar el cálculo
+por separado o impidiendo la integración con el total del turno.
+
+PREGUNTA 7 (Respuesta abierta · Evaluar · DOK 3 · 5 XP):
+Julián propone guardar el precio como texto (String). ¿Estás de acuerdo? Justifica con un ejemplo de cobro.
+RESPUESTA Y JUSTIFICACIÓN:
+NO se está de acuerdo. Los precios son valores cuantitativos sobre los cuales se realizan
+operaciones aritméticas (multiplicar por cantidad, sumar subtotales, aplicar descuentos).
+Si el precio fuera `String`, una expresión como `latte.precio + latte.precio` resultaría
+en concatenación de texto: `"9500" + "9500" = "95009500"`, en lugar de sumar `$19,000`.
+Además, se perdería el control de tipos en tiempo de compilación.
+
+PREGUNTA 8 (Respuesta abierta · Crear · DOK 3 · 5 XP):
+Escribe una clase Domicilio con 2 atributos y un método despachar() que cambie su estado.
+RESPUESTA Y CÓDIGO:
+```java
+public class Domicilio {
+    String direccion;
+    String estado = "pendiente";
+
+    void despachar() {
+        estado = "en camino";
+    }
+
+    String consultar() {
+        return "Domicilio a " + direccion + " · Estado: " + estado;
+    }
+}
+```
+JUSTIFICACIÓN:
+La clase define dos atributos (`direccion` y `estado`). Al crearse, el estado inicia como
+"pendiente". Al llamar al método `despachar()`, se muta el estado interno a "en camino".
+
+--------------------------------------------------------------------------------
+7. CIERRE DEL NIVEL 01 · METACOGNICIÓN
+--------------------------------------------------------------------------------
+- Semáforo de autoevaluación:
+  [VERDE] Explico qué es una clase, un objeto, un atributo y un método.
+  [VERDE] Escribo una clase con métodos que devuelven valores.
+  [VERDE] Creo objetos con new y uso el punto para llamarlos.
+  [VERDE] Leo un error del compilador y lo corrijo.
+
+- Mapa conceptual del nivel:
+  Clase Producto
+    ├── se guarda en Estado (atributos: String nombre, int precio, int stock)
+    ├── se define con Comportamiento (métodos: descripcion(), hayStock(), vender() con return)
+    ├── se crean con new (Objetos en el Heap: latte, brownie)
+    └── se accede con operador punto (.) para lectura, asignación y llamadas.
+
+- Taxonomía SOLO de Biggs/Marzano:
+  Nivel alcanzado: RELACIONAL.
+  Justificación: No solo se escriben atributos y métodos aislados, sino que se diseñan clases
+  coherentes donde los métodos protegen las reglas del negocio (como no vender más del stock
+  disponible o validar puntos antes de canjear).
+
+- Explicación en 60 segundos:
+  "Una clase es una plantilla o molde que describe la estructura y comportamiento que tendrán
+  los objetos. Por eso, Latte y Brownie pueden salir del mismo molde `Producto` pero tener
+  precios y nombres distintos: al ejecutar `new Producto()`, la máquina virtual reserva un espacio
+  de memoria independiente para cada objeto en el Heap. Cada ejemplar tiene su propio estado
+  aislado, aunque compartan la misma lógica de métodos."
+================================================================================

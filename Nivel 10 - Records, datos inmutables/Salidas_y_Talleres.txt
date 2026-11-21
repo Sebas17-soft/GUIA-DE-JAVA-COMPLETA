@@ -1,0 +1,90 @@
+================================================================================
+NIVEL 10: SALIDAS DE CONSOLA, PREDICCIONES Y TALLERES RESUELTOS
+JAVA 25 EN LA CAFETERÍA · CAFÉ SINTAXIS
+================================================================================
+
+1. SALIDA REAL DE CONSOLA (java Main.java)
+--------------------------------------------------------------------------------
+Entorno de ejecución: OpenJDK 25.0.4.1 (Linux x86_64)
+
+Comando ejecutado:
+~/cafe/Nivel 10 - Records, datos inmutables $ java Main.java
+
+Salida capturada:
+=== DEMOSTRACION SESION 03: RECIBO INMUTABLE ===
+LineaRecibo[producto=Latte, precio=9500, cantidad=2]
+Latte → $19000
+¿Iguales según equals?: true
+Recibo #1001 total: $26000
+Deconstruido: 2 × Latte a $9500
+
+=== DEMOSTRACION SESION 04: SEALED RECORDS Y PATRONES ===
+Efectivo: recibido $30000, cambio $4000
+Tarjeta Visa en 3 cuotas
+Nequi (saldo $50000)
+
+=== DEMOSTRACION SESION 06: CALIFICACIONES ===
+Sofía: 5
+¿Buena? true
+¿Iguales? true
+Calificacion[cliente=Sofía, estrellas=5]
+
+=== DEMOSTRACION SESION 07: MENU DEL DIA INMUTABLE ===
+Menú 2026-11-13 con 3 ítems. Promedio: $8000
+Precio nuevo m1: $5500 · Original sigue en: $5000
+Solo bebidas calientes:
+  Americano -> $5000
+
+=== DEMOSTRACION PREGUNTA 8 (S08): PROPINA ===
+Propina registrada para Martín: $5000
+Rechazada: Propina no puede ser negativa: -1000
+
+--------------------------------------------------------------------------------
+2. SESIÓN 03 · PREDICCIONES PRIMM
+--------------------------------------------------------------------------------
+PREDICCIÓN 1:
+- Pregunta: ¿Qué imprime IO.println(l1)?
+- Respuesta: Imprime el toString formateado automáticamente por Java:
+  `LineaRecibo[producto=Latte, precio=9500, cantidad=2]`.
+
+PREDICCIÓN 2:
+- Pregunta: ¿Por qué l1.equals(otra) da true si son dos new distintos?
+- Respuesta: Porque en los records `equals` compara el contenido y los valores de cada
+  componente, no la identidad de puntero de memoria.
+
+--------------------------------------------------------------------------------
+3. SESIÓN 06 · RETO 1: AUTOCOMPLETA EL CÓDIGO (RECORD CALIFICACIÓN)
+--------------------------------------------------------------------------------
+Banco de palabras proporcionado:
+[class, new, cliente, ==, getCliente, esBuena, this, Calificacion, record, b, estrellas, equals]
+
+TABLA DE RESPUESTAS Y JUSTIFICACIÓN:
+┌─────────┬──────────────────┬─────────────────────────────────────────────────────────────┐
+│ Espacio │ Palabra Elegida  │ ¿Por qué va ahí? (Una frase)                                │
+├─────────┼──────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1       │ record           │ Declara el tipo record Calificacion con sus componentes.    │
+│ 2       │ Calificacion     │ Identificador del constructor compacto de validación.       │
+│ 3       │ estrellas        │ Componente evaluado para determinar si es buena (>= 4).     │
+│ 4       │ cliente          │ Accesor generado por el record para leer el nombre.         │
+│ 5       │ esBuena          │ Método booleano de consulta de calificación destacada.      │
+│ 6       │ equals           │ Método generado automáticamente para comparar contenido.    │
+│ 7       │ a                │ Imprime el record a invocando su toString() implícito.      │
+└─────────┴──────────────────┴─────────────────────────────────────────────────────────────┘
+
+PREGUNTAS DE CONTROL:
+1. Pregunta: ¿Por qué el espacio 4 no es getCliente?
+   Respuesta: Porque en los records los accesores de componentes llevan exactamente el mismo
+   nombre del campo (`cliente()`), eliminando el prefijo get.
+
+2. Pregunta: Si en el espacio 6 escribes == en lugar de equals, ¿qué imprime?
+   Respuesta: Imprimiría `false`, porque compararía las referencias de memoria de dos objetos
+   distintos creados con dos llamados independientes a `new`.
+
+--------------------------------------------------------------------------------
+4. SESIÓN 07 · RETO 2: HAZLO TÚ (MENÚ DEL DÍA INMUTABLE)
+--------------------------------------------------------------------------------
+Requisitos implementados:
+1. `ItemMenu`: record con validación de precio y nombre, método `conPrecio(int)` que retorna nuevo record.
+2. `MenuDelDia`: record con lista inmutable y cálculo de precio promedio.
+3. Desestructuración con patrón `instanceof ItemMenu(var n, Categoria cat, var precio)` en bucle.
+================================================================================
